@@ -59,3 +59,4 @@ wrapt==1.10.11
 WTForms==2.1
 xlrd==1.1.0
 zope.interface==4.5.0
+regex==2018.6.21
