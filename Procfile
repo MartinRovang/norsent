@@ -1,1 +1,2 @@
-web: gunicorn deploy:Twittermain: python Twittermain.py
+web gunicorn deploy:app
+twitter: python Twittermain.py
