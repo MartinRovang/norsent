@@ -23,6 +23,10 @@ sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
 
+
+
+
+
 app = Flask(__name__)
 SQLALCHEMY_DATABASE_URI ='sqlite:///twitter.db'
 app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
@@ -56,32 +60,48 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
 sentiment_term = "Trump"
 
+
+# def table_columns(db, table_name):
+#     curs = db.cursor()
+#     sql = "select * from %s where 1=0;" % table_name
+#     curs.execute(sql)
+#     return [d[0] for d in curs.description]
+
 @app.route("/")
 def main():
     conn = sql.connect("twitter.db")
-    df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 100", conn, params=(sentiment_term+'*',))
-    df.sort_values('unix', inplace=True)
-    df['date'] = pd.to_datetime(df['unix'], unit='ms')
-    df.set_index('date', inplace=True)
-    init_length = len(df)
-    df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
-    df = df_resample_sizes(df)
-    X = df.index
-    Y = df.sentiment_smoothed.values
-    Y2 = df.volume.values
-    if Y[0] > 0:
-        return render_template("oppover.html",Yverdi = Y[0])
+    df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+    print(df['sentiment'])
+    # cursor = conn.cursor()
+    # cursor.execute(
+    #     "SELECT * FROM sentiment_fts " + 
+    #     "ORDER BY sentiment_fts.rowid DESC LIMIT 10")
+    # results = cursor.fetchall()
+    # colnames = table_columns(conn, 'sentiment_fts')
+    # print(colnames)
+    # cursor.close()
+    # conn.close()
+    # df = pd.read_sql(
+    #     "SELECT * FROM sentiment_fts " + 
+    #     # "sentiment_fts LEFT JOIN sentiment ON sentiment_fts.rowid = sentiment.id" + 
+    #     # "WHERE sentiment_fts.tweet MATCH ?" + 
+    #     "ORDER BY sentiment_fts.rowid DESC LIMIT 100", conn)#, params=(sentiment_term+'*',))
+    # df.sort_values('unix', inplace=True)
+    # df['date'] = pd.to_datetime(df['unix'], unit='ms')
+    # df.set_index('date', inplace=True)
+    # init_length = len(df)
+    # df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
+    # df = df_resample_sizes(df)
+    # X = df.index
+    # Y = df.sentiment_smoothed.values
+    # Y2 = df.volume.values
+    # if Y[0] > 0:
+    #     return render_template("oppover.html",Yverdi = Y[0])
 
-    else:
-        return render_template("nedover.html",Yverdi = Y[0])
+    # else:
+    #     return render_template("nedover.html",Yverdi = Y[0])
 
-    return 'hey'
-
-
-
-
-
-
+    return('test')
 
 
 

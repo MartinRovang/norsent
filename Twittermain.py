@@ -144,6 +144,8 @@ class listener(StreamListener):
             vs = analyzer.polarity_scores(tweet)
             sentiment = vs['compound']
             print(sentiment)
+            print(tweet)
+            print(time_ms)
             time.sleep(2)
             #print(time_ms, tweet, sentiment)
 
