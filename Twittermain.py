@@ -144,7 +144,7 @@ class listener(StreamListener):
             vs = analyzer.polarity_scores(tweet)
             sentiment = vs['compound']
             print(sentiment)
-            time.sleep(5)
+            time.sleep(2)
             #print(time_ms, tweet, sentiment)
 
             # append to data list (to be saved every 1 second)
@@ -164,7 +164,7 @@ while True:
         auth = OAuthHandler(ckey, csecret)
         auth.set_access_token(atoken, asecret)
         twitterStream = Stream(auth, listener(lock))
-        twitterStream.filter(track=["Trump","Oslo"])
+        twitterStream.filter(track=["Trump"])
     except Exception as e:
         print(str(e))
         time.sleep(5)
