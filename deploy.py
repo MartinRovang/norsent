@@ -86,7 +86,7 @@ def main():
         with open('errors.txt','a') as f:
             f.write(str(e))
             f.write('\n')
-
+    return "test"
 
 
 
