@@ -58,22 +58,22 @@ sentiment_term = "Trump"
 
 @app.route("/")
 def main():
-    # conn = sql.connect("twitter.db")
-    # df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 100", conn, params=(sentiment_term+'*',))
-    # df.sort_values('unix', inplace=True)
-    # df['date'] = pd.to_datetime(df['unix'], unit='ms')
-    # df.set_index('date', inplace=True)
-    # init_length = len(df)
-    # df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
-    # df = df_resample_sizes(df)
-    # X = df.index
-    # Y = df.sentiment_smoothed.values
-    # Y2 = df.volume.values
-    # if Y[0] > 0:
-    #     return render_template("oppover.html",Yverdi = Y[0])
+    conn = sql.connect("twitter.db")
+    df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 100", conn, params=(sentiment_term+'*',))
+    df.sort_values('unix', inplace=True)
+    df['date'] = pd.to_datetime(df['unix'], unit='ms')
+    df.set_index('date', inplace=True)
+    init_length = len(df)
+    df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
+    df = df_resample_sizes(df)
+    X = df.index
+    Y = df.sentiment_smoothed.values
+    Y2 = df.volume.values
+    if Y[0] > 0:
+        return render_template("oppover.html",Yverdi = Y[0])
 
-    # else:
-    #     return render_template("nedover.html",Yverdi = Y[0])
+    else:
+        return render_template("nedover.html",Yverdi = Y[0])
 
     return 'hey'
 
