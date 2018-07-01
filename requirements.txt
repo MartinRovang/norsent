@@ -61,13 +61,3 @@ xlrd==1.1.0
 zope.interface==4.5.0
 regex==2018.6.21
 python-memcached
-tweepy
-vaderSentiment
-unidecode
-dash
-dash-renderer
-dash-html-components
-dash-core-components
-plotly
-pandas
-regex
