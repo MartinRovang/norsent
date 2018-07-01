@@ -1,6 +1,6 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort
 import json
-import sqlite3
+import sqlite3 as sql
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from unidecode import unidecode
 from threading import Lock, Timer
@@ -23,17 +23,16 @@ sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
 
-app_colors = {
-    'background': '#0C0F0A',
-    'text': '#FFFFFF',
-    'sentiment-plot':'#41EAD4',
-    'volume-bar':'#FBFC74',
-    'someothercolor':'#FF206E',
-}
-
 
 
 app = Flask(__name__)
+SQLALCHEMY_DATABASE_URI ='sqlite:///twitter.db'
+app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
+app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+
 
 MAX_DF_LENGTH = 100
 def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
@@ -61,7 +60,7 @@ sentiment_term = "Trump"
 
 @app.route("/")
 def main():
-    conn = sqlite3.connect('twitter.db', isolation_level=None, check_same_thread=False)
+    conn = sql.connect("twitter.db")
     df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
     df.sort_values('unix', inplace=True)
     df['date'] = pd.to_datetime(df['unix'], unit='ms')
