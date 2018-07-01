@@ -22,17 +22,13 @@ import sys
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
-
+conn = sql.connect("twitter.db", check_same_thread=False)
 
 
 
 
 app = Flask(__name__)
-SQLALCHEMY_DATABASE_URI ='sqlite:///twitter.db'
-app.config['SECRET_KEY'] = 'Thisissupposedtobesecret!'
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
-app.config["SQLALCHEMY_POOL_RECYCLE"] = 299
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 
 
 
@@ -69,18 +65,9 @@ sentiment_term = "Trump"
 
 @app.route("/")
 def main():
-    conn = sql.connect("twitter.db")
     df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
-    print(df['sentiment'])
-    # cursor = conn.cursor()
-    # cursor.execute(
-    #     "SELECT * FROM sentiment_fts " + 
-    #     "ORDER BY sentiment_fts.rowid DESC LIMIT 10")
-    # results = cursor.fetchall()
     # colnames = table_columns(conn, 'sentiment_fts')
-    # print(colnames)
-    # cursor.close()
-    # conn.close()
+    print(df['sentiment'])
     # df = pd.read_sql(
     #     "SELECT * FROM sentiment_fts " + 
     #     # "sentiment_fts LEFT JOIN sentiment ON sentiment_fts.rowid = sentiment.id" + 
