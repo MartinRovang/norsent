@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
-conn = sql.connect("twitter.db", check_same_thread=False)
+
 
 
 
@@ -65,14 +65,16 @@ sentiment_term = "Trump"
 
 @app.route("/")
 def main():
-    df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+    try:
+        conn = sql.connect("twitter.db", check_same_thread=False)
+        df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
     # colnames = table_columns(conn, 'sentiment_fts')
-    print(df['sentiment'])
     # df = pd.read_sql(
     #     "SELECT * FROM sentiment_fts " + 
-    #     # "sentiment_fts LEFT JOIN sentiment ON sentiment_fts.rowid = sentiment.id" + 
-    #     # "WHERE sentiment_fts.tweet MATCH ?" + 
-    #     "ORDER BY sentiment_fts.rowid DESC LIMIT 100", conn)#, params=(sentiment_term+'*',))
+    #     "sentiment_fts LEFT JOIN sentiment ON sentiment_fts.rowid = sentiment.id" + 
+    #     "WHERE sentiment_fts.tweet MATCH ?" + 
+    #     "ORDER BY sentiment_fts.rowid DESC LIMIT 100", conn,)
+        print(df['sentiment'])
     # df.sort_values('unix', inplace=True)
     # df['date'] = pd.to_datetime(df['unix'], unit='ms')
     # df.set_index('date', inplace=True)
@@ -87,7 +89,10 @@ def main():
 
     # else:
     #     return render_template("nedover.html",Yverdi = Y[0])
-
+    except Exception as e:
+        with open('errors.txt','a') as f:
+            f.write(str(e))
+            f.write('\n')
     return('test')
 
 
