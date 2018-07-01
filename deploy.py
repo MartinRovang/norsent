@@ -21,7 +21,10 @@ import os
 import sys
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
-
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, Unicode, UnicodeText, String
+from sqlalchemy import create_engine
+engine = create_engine('sqlite:///tutorial.db', echo=True)
 
 
 
@@ -60,8 +63,10 @@ sentiment_term = "Trump"
 
 @app.route("/")
 def main():
+    Session = sessionmaker(bind=engine)
+    s = Session()
     conn = sql.connect("twitter.db")
-    df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+    df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 100", conn, params=(sentiment_term+'*',))
     df.sort_values('unix', inplace=True)
     df['date'] = pd.to_datetime(df['unix'], unit='ms')
     df.set_index('date', inplace=True)
