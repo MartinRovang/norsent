@@ -1,0 +1,106 @@
+from flask import Flask, flash, redirect, render_template, request, session, abort
+import json
+import sqlite3
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from unidecode import unidecode
+from threading import Lock, Timer
+import pandas as pd
+import regex as re
+from collections import Counter
+import string
+import pickle
+import itertools
+from textblob import TextBlob
+import numpy as np
+from googletrans import Translator
+import os
+import sys
+import time, threading
+# set chdir to current dir
+import os
+import sys
+sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
+os.chdir(os.path.realpath(os.path.dirname(__file__)))
+
+
+import dash
+from dash.dependencies import Output, Event, Input
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly
+import plotly.graph_objs as go
+
+
+app_colors = {
+    'background': '#0C0F0A',
+    'text': '#FFFFFF',
+    'sentiment-plot':'#41EAD4',
+    'volume-bar':'#FBFC74',
+    'someothercolor':'#FF206E',
+}
+
+
+
+app = Flask(__name__)
+
+MAX_DF_LENGTH = 100
+def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
+    df_len = len(df)
+    resample_amt = 100
+    vol_df = df.copy()
+    vol_df['volume'] = 1
+
+    ms_span = (df.index[-1] - df.index[0]).seconds * 1000
+    rs = int(ms_span / maxlen)
+
+    df = df.resample('{}ms'.format(int(rs))).mean()
+    df.dropna(inplace=True)
+
+    vol_df = vol_df.resample('{}ms'.format(int(rs))).sum()
+    vol_df.dropna(inplace=True)
+
+    df = df.join(vol_df['volume'])
+
+    return df
+
+
+
+sentiment_term = "Trump"
+
+@app.route("/")
+def main():
+    conn = sqlite3.connect('twitter.db', isolation_level=None, check_same_thread=False)
+    df = pd.read_sql("SELECT sentiment.* FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+    df.sort_values('unix', inplace=True)
+    df['date'] = pd.to_datetime(df['unix'], unit='ms')
+    df.set_index('date', inplace=True)
+    init_length = len(df)
+    df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
+    df = df_resample_sizes(df)
+    X = df.index
+    Y = df.sentiment_smoothed.values
+    Y2 = df.volume.values
+    if Y[0] > 0:
+        return render_template("oppover.html",Yverdi = Y[0])
+
+    else:
+        return render_template("nedover.html",Yverdi = Y[0])
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    app.run()
+
+
+
+
+
