@@ -1,2 +1,1 @@
-web: gunicorn deploy:app
-clock: python clock.py
+web: gunicorn deploy:Twittermain: python Twittermain.py
