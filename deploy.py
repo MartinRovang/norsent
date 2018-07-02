@@ -93,10 +93,10 @@ def foo():
     analyzer = SentimentIntensityAnalyzer()
 
     #consumer key, consumer secret, access token, access secret.
-    ckey="59PYrQl6ei43Wc9TfUEjWntxA"
-    csecret="1J2IvXODO8bi87PS4cyRvSNuNDn8CR3ntKbLyI9kRzrjK5zAnc"
-    atoken="37235540-yC4FXCOrNIAipEkRe488KAu2bDU64rHJQjhTOTNZQ"
-    asecret="66wVazURKsc7I7sntGWP5acagmcZS3VTggVP7dzxDOhPc"
+    # ckey="5"
+    # csecret="5"
+    # atoken="5"
+    # asecret="5"
 
     #Connect database
     # conn = sqlite3.connect('twitter.db')
