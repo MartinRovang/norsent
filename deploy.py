@@ -249,13 +249,13 @@ thread.start()
 #     return [d[0] for d in curs.description]
 
 
-@app.route('/square_plot.png')
-def images(cropzonekey):
-    return render_template("oppover.html", title=cropzonekey)
+@app.route('/')
+def home():
+    return render_template("home.html")
 
 
 
-@app.route("/")
+@app.route("/tweet")
 def main():
     
     try:
