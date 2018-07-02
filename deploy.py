@@ -168,7 +168,7 @@ def foo():
             # self.now+=self.delta
             self.yz.append(Y[-1])
             # fig.autofmt_xdate()
-            ax.set_title("Følelse rundt Trump ved å analysere twitter meldingen")
+            ax.set_title("Følelse rundt Trump ved å analysere twitter meldinger")
             ax.set_ylabel('Følelse')
             ax.axes.get_xaxis().set_ticks([])
             ax.plot(self.yz, '-',color = 'red')
@@ -207,7 +207,7 @@ def foo():
                 # print(sentiment)
                 # print(tweet)
                 # print(time_ms)
-                time.sleep(1)
+                time.sleep(4)
                 #print(time_ms, tweet, sentiment)
 
                 # append to data list (to be saved every 1 second)
