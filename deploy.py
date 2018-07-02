@@ -93,7 +93,7 @@ def foo():
     analyzer = SentimentIntensityAnalyzer()
 
     #consumer key, consumer secret, access token, access secret.
-
+    ckey="AxdHpqUPfEHfAVPHek143J0K8"
     #Connect database
     # conn = sqlite3.connect('twitter.db')
     # c = conn.cursor()
@@ -217,12 +217,11 @@ def foo():
 
 
 
-
     while True:
 
         try:
-            auth = OAuthHandler(ckey, csecret)
-            auth.set_access_token(atoken, asecret)
+            auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
+            auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
             twitterStream.filter(track=["Trump"])
         except Exception as e:
