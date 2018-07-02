@@ -136,7 +136,6 @@ def foo():
             Timer(1, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
-            print(self.data)
             print(self.sent)
             with self.lock:
                 if len(self.data):
@@ -171,7 +170,7 @@ def foo():
                 # print(sentiment)
                 # print(tweet)
                 # print(time_ms)
-                time.sleep(5)
+                time.sleep(1)
                 #print(time_ms, tweet, sentiment)
 
                 # append to data list (to be saved every 1 second)
@@ -217,8 +216,6 @@ def main():
         # s = Session()
         # query = s.query(data).filter(data.sent.in_([POST_SENT]) )
         # result = query.first()
-        thread = threading.Thread(target=foo)
-        thread.start()
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users",conn)
         # columns = table_columns(conn,users)
@@ -249,7 +246,8 @@ def main():
 
 
 if __name__ == "__main__":
+    thread = threading.Thread(target=foo)
+    thread.start()
     app.run()
-
 
 
