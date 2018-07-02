@@ -135,6 +135,7 @@ def foo():
         delta=datetime.timedelta(days=1)
         xz=[]
         yz=[]
+        yvolz=[]
         data = []
         sent = []
         lock = None
