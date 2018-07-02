@@ -136,7 +136,7 @@ def foo():
             Timer(1, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
-            print(self.data)
+            # print(self.data)
             with self.lock:
                 if len(self.data):
                     c.execute('BEGIN TRANSACTION')
@@ -231,11 +231,12 @@ def main():
         X = df.index
         Y = df.sentiment_smoothed.values
         Y2 = df.volume.values
-        if Y[0] > 0:
-            return render_template("oppover.html",Yverdi = Y[0])
+        print(Y)
+        if Y[-1] > 0:
+            return render_template("oppover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
 
         else:
-            return render_template("nedover.html",Yverdi = Y[0])
+            return render_template("nedover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
     except Exception as e:
         print(str(e))
     return "test"
