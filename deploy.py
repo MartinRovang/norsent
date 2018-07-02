@@ -26,15 +26,14 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 from io import BytesIO
 import random
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 import datetime
 import base64
-import matplotlib
-matplotlib.use('Agg')
-
 
 
 
