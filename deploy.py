@@ -93,10 +93,6 @@ def foo():
     analyzer = SentimentIntensityAnalyzer()
 
     #consumer key, consumer secret, access token, access secret.
-    # ckey="5"
-    # csecret="5"
-    # atoken="5"
-    # asecret="5"
 
     #Connect database
     # conn = sqlite3.connect('twitter.db')
@@ -131,11 +127,8 @@ def foo():
     lock = Lock()
 
     class listener(StreamListener):
-        now=datetime.datetime.now()
-        delta=datetime.timedelta(days=1)
         xz=[]
         yz=[]
-        yvolz=[]
         data = []
         sent = []
         lock = None
