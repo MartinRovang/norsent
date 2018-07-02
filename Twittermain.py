@@ -62,37 +62,6 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
 
 
-# def create_table():
-#     try:
-
-#         # http://www.sqlite.org/pragma.html#pragma_journal_mode
-#         # for us - it allows concurrent write and reads
-#         c.execute("PRAGMA journal_mode=wal")
-#         c.execute("PRAGMA wal_checkpoint=TRUNCATE")
-#         #c.execute("PRAGMA journal_mode=PERSIST")
-
-#         # changed unix to INTEGER (it is integer, sqlite can use up to 8-byte long integers)
-#         c.execute("CREATE TABLE IF NOT EXISTS sentiment(id INTEGER PRIMARY KEY AUTOINCREMENT, unix INTEGER, tweet TEXT, sentiment REAL)")
-#         # key-value table for random stuff
-#         c.execute("CREATE TABLE IF NOT EXISTS misc(key TEXT PRIMARY KEY, value TEXT)")
-#         # id on index, both as DESC (as you are sorting in DESC order)
-#         c.execute("CREATE INDEX id_unix ON sentiment (id DESC, unix DESC)")
-#         # out full-text search table, i choosed creating data from external (content) table - sentiment
-#         # instead of directly inserting to that table, as we are saving more data than just text
-#         # https://sqlite.org/fts5.html - 4.4.2
-#         c.execute("CREATE VIRTUAL TABLE sentiment_fts USING fts5(tweet, content=sentiment, content_rowid=id, prefix=1, prefix=2, prefix=3)")
-#         # that trigger will automagically update out table when row is interted
-#         # (requires additional triggers on update and delete)
-#         c.execute("""
-#             CREATE TRIGGER sentiment_insert AFTER INSERT ON sentiment BEGIN
-#                 INSERT INTO sentiment_fts(rowid, tweet) VALUES (new.id, new.tweet);
-#             END
-#         """)
-#     except Exception as e:
-#         print(str(e))
-# create_table()
-
-# create lock
 lock = Lock()
 
 class listener(StreamListener):
@@ -118,19 +87,6 @@ class listener(StreamListener):
         Timer(1, self.save_in_database).start()
         conn = sqlite3.connect('twitter.db')
         c = conn.cursor()
-        # try:
-        #     c.execute("INSERT INTO users (data1,sent) VALUES (?,?)", self.sent)
-        #     conn.commit()
-        # except Exception as e:
-        #     print(str(e))
-        #     time.sleep(5)
-        # try:
-        #     c.execute("INSERT INTO users (sent) VALUES (?)", self.sent)
-        #     conn.commit()
-        #     print(self.sent)
-        # except Exception as e:
-        #     print(str(e))
-        #     time.sleep(5)
         print(self.data)
         print(self.sent)
         with self.lock:
