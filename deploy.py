@@ -200,8 +200,10 @@ def foo():
 
 
 
-sentiment_term = "Trump"
-
+# sentiment_term = "Trump"
+#Start twitter threading
+thread = threading.Thread(target=foo)
+thread.start()
 
 # def table_columns(db, table_name):
 #     curs = db.cursor()
@@ -246,8 +248,6 @@ def main():
 
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=foo)
-    thread.start()
     app.run()
 
 
