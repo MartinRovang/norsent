@@ -86,7 +86,6 @@ def foo():
 
 
 
-    MAX_DF_LENGTH = 100
     def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
         df_len = len(df)
         resample_amt = 100
@@ -227,7 +226,7 @@ def main():
         df.set_index('date', inplace=True)
         init_length = len(df)
         df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df)
+        df = df_resample_sizes(df,maxlen=100)
         X = df.index
         Y = df.sentiment_smoothed.values
         Y2 = df.volume.values
