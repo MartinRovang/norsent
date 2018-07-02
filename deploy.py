@@ -21,7 +21,12 @@ import os
 import sys
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
-
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, Unicode, UnicodeText
+from sqlalchemy import create_engine, ForeignKey
+from tabledef import *
+engine = create_engine('sqlite:///twitter.db', echo=True)
+Session = sessionmaker(bind=engine)
 
 
 
@@ -57,22 +62,28 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 sentiment_term = "Trump"
 
 
-# def table_columns(db, table_name):
-#     curs = db.cursor()
-#     sql = "select * from %s where 1=0;" % table_name
-#     curs.execute(sql)
-#     return [d[0] for d in curs.description]
+def table_columns(db, table_name):
+    curs = db.cursor()
+    sql = "select * from %s where 1=0;" % table_name
+    curs.execute(sql)
+    return [d[0] for d in curs.description]
 
 @app.route("/")
 def main():
     try:
-        conn = sql.connect("twitter.db", check_same_thread=False)
-        df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
-        df.sort_values('unix', inplace=True)
-        df['date'] = pd.to_datetime(df['unix'], unit='ms')
+        # Session = sessionmaker(bind=engine)
+        # s = Session()
+        # query = s.query(data).filter(data.sent.in_([POST_SENT]) )
+        # result = query.first()
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users",conn)
+        # columns = table_columns(conn,users)
+        # df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+        # df.sort_values('unix', inplace=True)
+        df['date'] = pd.to_datetime(df['data1'], unit='ms')
         df.set_index('date', inplace=True)
         init_length = len(df)
-        df['sentiment_smoothed'] = df['sentiment'].rolling(int(len(df)/5)).mean()
+        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
         df = df_resample_sizes(df)
         X = df.index
         Y = df.sentiment_smoothed.values
@@ -83,17 +94,18 @@ def main():
         else:
             return render_template("nedover.html",Yverdi = Y[0])
     except Exception as e:
-        with open('errors.txt','a') as f:
-            f.write(str(e))
-            f.write('\n')
+        print(str(e))
     return "test"
+
+
+
+
+
 
 
 
 if __name__ == "__main__":
     app.run()
-
-
 
 
 

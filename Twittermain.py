@@ -18,6 +18,7 @@ from googletrans import Translator
 import os
 import sys
 import time, threading
+from tabledef import *
 
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
@@ -31,8 +32,8 @@ atoken="37235540-yC4FXCOrNIAipEkRe488KAu2bDU64rHJQjhTOTNZQ"
 asecret="66wVazURKsc7I7sntGWP5acagmcZS3VTggVP7dzxDOhPc"
 
 #Connect database
-conn = sqlite3.connect('twitter.db', isolation_level=None, check_same_thread=False)
-c = conn.cursor()
+# conn = sqlite3.connect('twitter.db')
+# c = conn.cursor()
 
 
 
@@ -61,35 +62,35 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
 
 
-def create_table():
-    try:
+# def create_table():
+#     try:
 
-        # http://www.sqlite.org/pragma.html#pragma_journal_mode
-        # for us - it allows concurrent write and reads
-        c.execute("PRAGMA journal_mode=wal")
-        c.execute("PRAGMA wal_checkpoint=TRUNCATE")
-        #c.execute("PRAGMA journal_mode=PERSIST")
+#         # http://www.sqlite.org/pragma.html#pragma_journal_mode
+#         # for us - it allows concurrent write and reads
+#         c.execute("PRAGMA journal_mode=wal")
+#         c.execute("PRAGMA wal_checkpoint=TRUNCATE")
+#         #c.execute("PRAGMA journal_mode=PERSIST")
 
-        # changed unix to INTEGER (it is integer, sqlite can use up to 8-byte long integers)
-        c.execute("CREATE TABLE IF NOT EXISTS sentiment(id INTEGER PRIMARY KEY AUTOINCREMENT, unix INTEGER, tweet TEXT, sentiment REAL)")
-        # key-value table for random stuff
-        c.execute("CREATE TABLE IF NOT EXISTS misc(key TEXT PRIMARY KEY, value TEXT)")
-        # id on index, both as DESC (as you are sorting in DESC order)
-        c.execute("CREATE INDEX id_unix ON sentiment (id DESC, unix DESC)")
-        # out full-text search table, i choosed creating data from external (content) table - sentiment
-        # instead of directly inserting to that table, as we are saving more data than just text
-        # https://sqlite.org/fts5.html - 4.4.2
-        c.execute("CREATE VIRTUAL TABLE sentiment_fts USING fts5(tweet, content=sentiment, content_rowid=id, prefix=1, prefix=2, prefix=3)")
-        # that trigger will automagically update out table when row is interted
-        # (requires additional triggers on update and delete)
-        c.execute("""
-            CREATE TRIGGER sentiment_insert AFTER INSERT ON sentiment BEGIN
-                INSERT INTO sentiment_fts(rowid, tweet) VALUES (new.id, new.tweet);
-            END
-        """)
-    except Exception as e:
-        print(str(e))
-create_table()
+#         # changed unix to INTEGER (it is integer, sqlite can use up to 8-byte long integers)
+#         c.execute("CREATE TABLE IF NOT EXISTS sentiment(id INTEGER PRIMARY KEY AUTOINCREMENT, unix INTEGER, tweet TEXT, sentiment REAL)")
+#         # key-value table for random stuff
+#         c.execute("CREATE TABLE IF NOT EXISTS misc(key TEXT PRIMARY KEY, value TEXT)")
+#         # id on index, both as DESC (as you are sorting in DESC order)
+#         c.execute("CREATE INDEX id_unix ON sentiment (id DESC, unix DESC)")
+#         # out full-text search table, i choosed creating data from external (content) table - sentiment
+#         # instead of directly inserting to that table, as we are saving more data than just text
+#         # https://sqlite.org/fts5.html - 4.4.2
+#         c.execute("CREATE VIRTUAL TABLE sentiment_fts USING fts5(tweet, content=sentiment, content_rowid=id, prefix=1, prefix=2, prefix=3)")
+#         # that trigger will automagically update out table when row is interted
+#         # (requires additional triggers on update and delete)
+#         c.execute("""
+#             CREATE TRIGGER sentiment_insert AFTER INSERT ON sentiment BEGIN
+#                 INSERT INTO sentiment_fts(rowid, tweet) VALUES (new.id, new.tweet);
+#             END
+#         """)
+#     except Exception as e:
+#         print(str(e))
+# create_table()
 
 # create lock
 lock = Lock()
@@ -97,6 +98,7 @@ lock = Lock()
 class listener(StreamListener):
 
     data = []
+    sent = []
     lock = None
 
     def __init__(self, lock):
@@ -114,18 +116,36 @@ class listener(StreamListener):
 
         # set a timer (1 second)
         Timer(1, self.save_in_database).start()
-
-        # with lock, if there's data, save in transaction using one bulk query
+        conn = sqlite3.connect('twitter.db')
+        c = conn.cursor()
+        # try:
+        #     c.execute("INSERT INTO users (data1,sent) VALUES (?,?)", self.sent)
+        #     conn.commit()
+        # except Exception as e:
+        #     print(str(e))
+        #     time.sleep(5)
+        # try:
+        #     c.execute("INSERT INTO users (sent) VALUES (?)", self.sent)
+        #     conn.commit()
+        #     print(self.sent)
+        # except Exception as e:
+        #     print(str(e))
+        #     time.sleep(5)
+        print(self.data)
+        print(self.sent)
         with self.lock:
             if len(self.data):
                 c.execute('BEGIN TRANSACTION')
                 try:
-                    c.executemany("INSERT INTO sentiment (unix, tweet, sentiment) VALUES (?, ?, ?)", self.data)
-                except:
-                    pass
-                c.execute('COMMIT')
+                        c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", self.data)
+                        conn.commit()
+                        # print("test")
+                except Exception as e:
+                    print(str(e))
+                # c.execute('COMMIT')
 
                 self.data = []
+                self.sent = []
 
     def on_data(self, data):
         try:
@@ -143,14 +163,17 @@ class listener(StreamListener):
             time_ms = data['timestamp_ms']
             vs = analyzer.polarity_scores(tweet)
             sentiment = vs['compound']
-            print(sentiment)
-            print(tweet)
-            print(time_ms)
+            # print(sentiment)
+            # print(tweet)
+            # print(time_ms)
             time.sleep(2)
             #print(time_ms, tweet, sentiment)
 
             # append to data list (to be saved every 1 second)
             with self.lock:
+                # self.data.append((time_ms))
+                # print(self.data)
+                # self.sent.append((sentiment))
                 self.data.append((time_ms, tweet, sentiment))
         except KeyError as e:
             #print(data)
