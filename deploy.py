@@ -32,7 +32,8 @@ from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 import datetime
 import base64
-
+import matplotlib
+matplotlib.use('Agg')
 
 
 
