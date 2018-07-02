@@ -136,7 +136,7 @@ def foo():
             Timer(1, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
-            print(self.sent)
+            print(self.data)
             with self.lock:
                 if len(self.data):
                     c.execute('BEGIN TRANSACTION')
