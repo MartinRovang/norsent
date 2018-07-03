@@ -100,30 +100,6 @@ def foo():
 
 
 
-    def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
-        df_len = len(df)
-        resample_amt = 100
-        vol_df = df.copy()
-        vol_df['volume'] = 1
-
-        ms_span = (df.index[-1] - df.index[0]).seconds * 1000
-        rs = int(ms_span / maxlen)
-
-        df = df.resample('{}ms'.format(int(rs))).mean()
-        df.dropna(inplace=True)
-
-        vol_df = vol_df.resample('{}ms'.format(int(rs))).sum()
-        vol_df.dropna(inplace=True)
-
-        df = df.join(vol_df['volume'])
-
-        return df
-
-
-
-
-
-
     lock = Lock()
 
     class listener(StreamListener):
@@ -201,7 +177,7 @@ def foo():
                 # print(sentiment)
                 # print(tweet)
                 # print(time_ms)
-                time.sleep(4)
+                time.sleep(1)
                 #print(time_ms, tweet, sentiment)
 
                 # append to data list (to be saved every 1 second)
@@ -232,8 +208,6 @@ def foo():
 
 # sentiment_term = "Trump"
 #Start twitter threading
-thread = threading.Thread(target=foo)
-thread.start()
 
 # def table_columns(db, table_name):
 #     curs = db.cursor()
@@ -285,10 +259,12 @@ def main():
 
 
 
-
+thread = threading.Thread(target=foo)
+thread.start()
 
 
 if __name__ == "__main__":
+
     app.run()
 
 
