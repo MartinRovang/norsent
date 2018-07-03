@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, abort, make_response, send_file
+from flask import Flask, flash, redirect, render_template, request, session, abort
 import json
 import sqlite3 as sql
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -24,16 +24,11 @@ from tabledef import *
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-from io import BytesIO
-import random
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter
-import datetime
-import base64
+
+
+
+
+
 
 
 
@@ -41,19 +36,6 @@ sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 engine = create_engine('sqlite:///twitter.db', echo=True)
 Session = sessionmaker(bind=engine)
-
-
-
-
-
-fig=Figure()
-ax=fig.add_subplot(111)
-
-
-
-
-
-
 
 
 
@@ -100,11 +82,34 @@ def foo():
 
 
 
+    def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
+        df_len = len(df)
+        resample_amt = 100
+        vol_df = df.copy()
+        vol_df['volume'] = 1
+
+        ms_span = (df.index[-1] - df.index[0]).seconds * 1000
+        rs = int(ms_span / maxlen)
+
+        df = df.resample('{}ms'.format(int(rs))).mean()
+        df.dropna(inplace=True)
+
+        vol_df = vol_df.resample('{}ms'.format(int(rs))).sum()
+        vol_df.dropna(inplace=True)
+
+        df = df.join(vol_df['volume'])
+
+        return df
+
+
+
+
+
+
     lock = Lock()
 
     class listener(StreamListener):
-        xz=[]
-        yz=[]
+
         data = []
         sent = []
         lock = None
@@ -126,23 +131,6 @@ def foo():
             Timer(1, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
-            df = pd.read_sql("SELECT * FROM users",conn)
-            df['date'] = pd.to_datetime(df['data1'], unit='ms')
-            df.set_index('date', inplace=True)
-            init_length = len(df)
-            df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-            df = df_resample_sizes(df,maxlen=100)
-            X = df.index
-            Y = df.sentiment_smoothed.values
-            # self.xz.append(self.now)
-            # self.now+=self.delta
-            self.yz.append(Y[-1])
-            # fig.autofmt_xdate()
-            ax.set_title("Følelse rundt Trump ved å analysere twitter meldinger")
-            ax.set_ylabel('Følelse')
-            ax.axes.get_xaxis().set_ticks([])
-            ax.plot(self.yz, '-',color = 'red')
-            # ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
             # print(self.data)
             with self.lock:
                 if len(self.data):
@@ -193,6 +181,7 @@ def foo():
 
 
 
+
     while True:
 
         try:
@@ -208,6 +197,8 @@ def foo():
 
 # sentiment_term = "Trump"
 #Start twitter threading
+thread = threading.Thread(target=foo)
+thread.start()
 
 # def table_columns(db, table_name):
 #     curs = db.cursor()
@@ -215,19 +206,18 @@ def foo():
 #     curs.execute(sql)
 #     return [d[0] for d in curs.description]
 
-
-@app.route('/')
-def home():
-    return render_template("home.html")
-
-
-
-@app.route("/tweet")
+@app.route("/")
 def main():
-    
     try:
+        # Session = sessionmaker(bind=engine)
+        # s = Session()
+        # query = s.query(data).filter(data.sent.in_([POST_SENT]) )
+        # result = query.first()
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users",conn)
+        # columns = table_columns(conn,users)
+        # df = pd.read_sql("SELECT * FROM sentiment_fts fts LEFT JOIN sentiment ON fts.rowid = sentiment.id WHERE fts.sentiment_fts MATCH ? ORDER BY fts.rowid DESC LIMIT 1000", conn, params=(sentiment_term+'*',))
+        # df.sort_values('unix', inplace=True)
         df['date'] = pd.to_datetime(df['data1'], unit='ms')
         df.set_index('date', inplace=True)
         init_length = len(df)
@@ -236,21 +226,12 @@ def main():
         X = df.index
         Y = df.sentiment_smoothed.values
         Y2 = df.volume.values
-        print(df['sentiment_smoothed'])
-        # if Y[-1] > 0:
-        #     return render_template("oppover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
+        print(Y)
+        if Y[-1] > 0:
+            return render_template("oppover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
 
-        # else:
-        #     return render_template("nedover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
-        canvas=FigureCanvas(fig)
-        png_output = BytesIO()
-        canvas.print_png(png_output)
-        response=make_response(png_output.getvalue())
-        response.headers['Content-Type'] = 'image/png'
-        # figdata_png = base64.b64encode(png_output.getvalue())
-        # result = figdata_png
-        return response
-    # return render_template("oppover.html", title=bilde)
+        else:
+            return render_template("nedover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
     except Exception as e:
         print(str(e))
     return "test"
@@ -259,12 +240,10 @@ def main():
 
 
 
-thread = threading.Thread(target=foo)
-thread.start()
+
 
 
 if __name__ == "__main__":
-
     app.run()
 
 
