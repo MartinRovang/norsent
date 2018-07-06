@@ -207,7 +207,7 @@ def chart():
         print(Y2)
         # sent = [408,547,675,734]
         # values = [408,547,675,734]
-        labels = -np.round(np.linspace((len(Y2)/(8*60)),0,len(Y2)),2)
+        labels = -np.round(np.linspace((len(Y2)/(2*60)),0,len(Y2)),2)
         return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels)
     except Exception as e:
         return e
