@@ -11,67 +11,69 @@
 
 
 
-  <canvas id="linechart" width="800" height="400"></canvas>
+    <canvas id="linechart" width="800" height="400"></canvas>
 
-<script>
-  Chart.defaults.global.responsive = false;
-new Chart(document.getElementById("linechart"), {
-  type: 'line',
-  data: {
-      labels: [{% for item in labels %}
-                      {{item}},
-                    {% endfor %}],
-    datasets: [{ 
-          data : [{% for item in sent %}
-                      {{item}},
-                    {% endfor %}],
-        label: "Trump",
-        borderColor: "#3e95cd",
-        fill: false
+    <script>
+      Chart.defaults.global.responsive = false;
+    new Chart(document.getElementById("linechart"), {
+      type: 'line',
+      data: {
+          labels: [{% for item in labels %}
+                          {{item}},
+                        {% endfor %}],
+        datasets: [{ 
+              data : [{% for item in sent %}
+                          {{item}},
+                        {% endfor %}],
+            label: "Trump",
+            borderColor: "#3e95cd",
+            fill: false
+          },
+        ]
       },
-    ]
-  },
-  options: {
-    title: {
-      display: true,
-      text: 'Følelse rundt Trump ved å analysere twittermeldinger.'
-    }
-  }
-});
+      options: {
+        title: {
+          display: true,
+          text: 'Følelse rundt Trump ved å analysere twittermeldinger.'
+        }
+      }
+    });
+    </script> 
+    
+    
+    
+    <canvas id="barchart" width="800" height="400"></canvas>
+    
+    <script>
+      let data = [{% for item in vol %}
+                          {{item}},
+                        {% endfor %}];
+      let labels =  [{% for item in labels %}
+                          {{item}},
+                        {% endfor %}];
+                        var ctx = document.getElementById("barchart");
+                var barchart = new Chart(ctx, {
 
-</script> 
-
-
-
-<canvas id="barchart" width="800" height="400"></canvas>
-
-<script>
-
-new Chart(document.getElementById("barchart"), {
-  type: 'bar',
-  data: {
-      labels: [{% for item in labels %}
-                      {{item}},
-                    {% endfor %}],
-    datasets: [{ 
-          data : [{% for item in vol %}
-                      {{item}},
-                    {% endfor %}],
-        label: "Trump",
-        borderColor: "#3e95cd",
-        fill: false
+      type: 'bar',
+      data: {
+          labels:labels,
+        datasets: [{ 
+              data : data,
+            label: "Trump",
+            borderColor: "#3e95cd",
+            fill: false
+          },
+        ]
       },
-    ]
-  },
-  options: {
-    title: {
-      display: true,
-      text: 'Volum'
-    }
-  }
-});
+      options: {
+        title: {
+          display: true,
+          text: 'Volum'
+        }
+      }
+    });
 
-</script> 
-
-</body>
-</html>
+    </script> 
+    
+    </body>
+    </html>
