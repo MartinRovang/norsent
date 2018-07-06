@@ -16,7 +16,6 @@ from googletrans import Translator
 import os
 import sys
 import time, threading
-# set chdir to current dir
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, Unicode, UnicodeText
 from sqlalchemy import create_engine, ForeignKey
@@ -34,6 +33,7 @@ from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 import datetime
 import base64
+
 
 
 
@@ -92,7 +92,6 @@ def foo():
 
     analyzer = SentimentIntensityAnalyzer()
 
-    #consumer key, consumer secret, access token, access secret.
 
     #Connect database
     # conn = sqlite3.connect('twitter.db')
@@ -108,6 +107,7 @@ def foo():
         data = []
         sent = []
         lock = None
+        parti = "trump"
 
         def __init__(self, lock):
 
@@ -121,35 +121,18 @@ def foo():
             super().__init__()
 
         def save_in_database(self):
-
+            sentiment_term = "trump"
             # set a timer (1 second)
             Timer(1, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
-            df = pd.read_sql("SELECT * FROM users",conn)
-            df['date'] = pd.to_datetime(df['data1'], unit='ms')
-            df.set_index('date', inplace=True)
-            init_length = len(df)
-            df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-            df = df_resample_sizes(df,maxlen=100)
-            X = df.index
-            Y = df.sentiment_smoothed.values
-            # self.xz.append(self.now)
-            # self.now+=self.delta
-            self.yz.append(Y[-1])
-            # fig.autofmt_xdate()
-            ax.set_title("Følelse rundt Trump ved å analysere twitter meldinger")
-            ax.set_ylabel('Følelse')
-            ax.axes.get_xaxis().set_ticks([])
-            ax.plot(self.yz, '-',color = 'red')
-            # ax.xaxis.set_major_formatter(DateFormatter('%H:%M'))
-            # print(self.data)
             with self.lock:
                 if len(self.data):
                     c.execute('BEGIN TRANSACTION')
                     try:
                             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", self.data)
                             conn.commit()
+                            print("INSERTS DATA")
                             # print("test")
                     except Exception as e:
                         print(str(e))
@@ -182,9 +165,6 @@ def foo():
 
                 # append to data list (to be saved every 1 second)
                 with self.lock:
-                    # self.data.append((time_ms))
-                    # print(self.data)
-                    # self.sent.append((sentiment))
                     self.data.append((time_ms, tweet, sentiment))
             except KeyError as e:
                 #print(data)
@@ -206,54 +186,65 @@ def foo():
 
 
 
-# sentiment_term = "Trump"
-#Start twitter threading
-
-# def table_columns(db, table_name):
-#     curs = db.cursor()
-#     sql = "select * from %s where 1=0;" % table_name
-#     curs.execute(sql)
-#     return [d[0] for d in curs.description]
-
-
-@app.route('/')
-def home():
-    return render_template("home.html")
 
 
 
 @app.route("/tweet")
-def main():
-    
+def chart():
     try:
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users",conn)
+        df.sort_values('data1', inplace=True)
         df['date'] = pd.to_datetime(df['data1'], unit='ms')
         df.set_index('date', inplace=True)
         init_length = len(df)
         df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df,maxlen=100)
+        df = df_resample_sizes(df,maxlen=500)
         X = df.index
         Y = df.sentiment_smoothed.values
         Y2 = df.volume.values
-        print(df['sentiment_smoothed'])
-        # if Y[-1] > 0:
-        #     return render_template("oppover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
-
-        # else:
-        #     return render_template("nedover.html",Yverdi = Y[-1],Yvolume = Y2[-1])
-        canvas=FigureCanvas(fig)
-        png_output = BytesIO()
-        canvas.print_png(png_output)
-        response=make_response(png_output.getvalue())
-        response.headers['Content-Type'] = 'image/png'
-        # figdata_png = base64.b64encode(png_output.getvalue())
-        # result = figdata_png
-        return response
-    # return render_template("oppover.html", title=bilde)
+        print(len(Y2))
+        print(X)
+        print(Y2)
+        # sent = [408,547,675,734]
+        # values = [408,547,675,734]
+        labels = -np.linspace(5,0,len(Y2))
+        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels)
     except Exception as e:
-        print(str(e))
-    return "test"
+        return e
+@app.route('/')
+def home():
+
+    return render_template("home.html")
+
+
+
+
+# @app.route("/tweet")
+# def main():
+    
+#     try:
+        # conn = sql.connect("twitter.db")
+        # df = pd.read_sql("SELECT * FROM users",conn)
+        # df['date'] = pd.to_datetime(df['data1'], unit='ms')
+        # df.set_index('date', inplace=True)
+        # init_length = len(df)
+        # df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+        # df = df_resample_sizes(df,maxlen=100)
+        # X = df.index
+        # Y = df.sentiment_smoothed.values
+        # Y2 = df.volume.values
+        # print(df['sentiment_smoothed'])
+
+    #     canvas=FigureCanvas(fig)
+    #     png_output = BytesIO()
+    #     canvas.print_png(png_output)
+    #     response=make_response(png_output.getvalue())
+    #     response.headers['Content-Type'] = 'image/png'
+    #     return response
+    # except Exception as e:
+    #     print(str(e))
+    # return "test"
 
 
 

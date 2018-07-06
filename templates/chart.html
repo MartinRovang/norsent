@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <title>My Chart.js Chart</title>
+</head>
+<body>
+
+
+
+
+  <canvas id="linechart" width="800" height="400"></canvas>
+
+<script>
+  Chart.defaults.global.responsive = false;
+new Chart(document.getElementById("linechart"), {
+  type: 'line',
+  data: {
+      labels: [{% for item in labels %}
+                      {{item}},
+                    {% endfor %}],
+    datasets: [{ 
+          data : [{% for item in sent %}
+                      {{item}},
+                    {% endfor %}],
+        label: "Trump",
+        borderColor: "#3e95cd",
+        fill: false
+      },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: 'Følelse rundt Trump ved å analysere twittermeldinger.'
+    }
+  }
+});
+
+</script> 
+
+
+
+<canvas id="barchart" width="800" height="400"></canvas>
+
+<script>
+
+new Chart(document.getElementById("barchart"), {
+  type: 'bar',
+  data: {
+      labels: [{% for item in labels %}
+                      {{item}},
+                    {% endfor %}],
+    datasets: [{ 
+          data : [{% for item in vol %}
+                      {{item}},
+                    {% endfor %}],
+        label: "Trump",
+        borderColor: "#3e95cd",
+        fill: false
+      },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: 'Volum'
+    }
+  }
+});
+
+</script> 
+
+</body>
+</html>
