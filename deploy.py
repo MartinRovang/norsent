@@ -26,6 +26,7 @@ from tweepy.streaming import StreamListener
 from io import BytesIO
 import random
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import datetime
