@@ -26,14 +26,11 @@ from tweepy.streaming import StreamListener
 from io import BytesIO
 import random
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 from matplotlib.dates import DateFormatter
 import datetime
 import base64
-
+from time import gmtime, strftime
 
 
 
@@ -46,22 +43,15 @@ Session = sessionmaker(bind=engine)
 
 
 
-fig=Figure()
-ax=fig.add_subplot(111)
-
-
-
-
-
-
-
-
 
 
 
 app = Flask(__name__)
 
-
+def movingavarage(values,window):
+	weights = np.repeat(1.0,window)/window
+	smas = np.convolve(values,weights,'valid')
+	return smas
 
 
 MAX_DF_LENGTH = 100
@@ -121,9 +111,9 @@ def foo():
             super().__init__()
 
         def save_in_database(self):
-            sentiment_term = "trump"
+            # chart()
             # set a timer (1 second)
-            Timer(1, self.save_in_database).start()
+            Timer(3, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
             with self.lock:
@@ -187,63 +177,40 @@ def foo():
 
 
 
-
 @app.route("/tweet")
 def chart():
-    try:
-        conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users",conn)
-        df.sort_values('data1', inplace=True)
-        df['date'] = pd.to_datetime(df['data1'], unit='ms')
-        df.set_index('date', inplace=True)
-        init_length = len(df)
-        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df,maxlen=500)
-        X = df.index
-        Y = df.sentiment_smoothed.values
-        Y2 = df.volume.values
-        print(len(Y2))
-        print(X)
-        print(Y2)
-        # sent = [408,547,675,734]
-        # values = [408,547,675,734]
-        labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
-        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels)
-    except Exception as e:
-        return e
+    conn = sql.connect("twitter.db")
+    df = pd.read_sql("SELECT * FROM users",conn)
+    G = df['what'].astype(float).values
+    df.sort_values('data1', inplace=True)
+    df['date'] = pd.to_datetime(df['data1'], unit='ms')
+    df.set_index('date', inplace=True)
+    init_length = len(df)
+    df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+    df = df_resample_sizes(df,maxlen=500)
+    X = df.index
+    Y = df.sentiment_smoothed.values
+    Y2 = df.volume.values
+    # sent = [408,547,675,734]
+    # values = [408,547,675,734]
+    labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
+    # if len(B) < len(Y):
+    #     L = strftime('%H:%M', gmtime())
+    #     print(L)
+    #     B.append(L)
+    #     print(B)
+    # if len(B) == len(Y):
+    #     B = [w.replace(':', '.') for w in B]
+    #     B = np.array(B)
+    #     labels = B.astype(float)
+    #     print(labels)
+    return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,50) ,labels = labels)
+
+
 @app.route('/')
 def home():
 
     return render_template("home.html")
-
-
-
-
-# @app.route("/tweet")
-# def main():
-    
-#     try:
-        # conn = sql.connect("twitter.db")
-        # df = pd.read_sql("SELECT * FROM users",conn)
-        # df['date'] = pd.to_datetime(df['data1'], unit='ms')
-        # df.set_index('date', inplace=True)
-        # init_length = len(df)
-        # df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        # df = df_resample_sizes(df,maxlen=100)
-        # X = df.index
-        # Y = df.sentiment_smoothed.values
-        # Y2 = df.volume.values
-        # print(df['sentiment_smoothed'])
-
-    #     canvas=FigureCanvas(fig)
-    #     png_output = BytesIO()
-    #     canvas.print_png(png_output)
-    #     response=make_response(png_output.getvalue())
-    #     response.headers['Content-Type'] = 'image/png'
-    #     return response
-    # except Exception as e:
-    #     print(str(e))
-    # return "test"
 
 
 
