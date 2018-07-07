@@ -111,7 +111,7 @@ def foo():
             super().__init__()
 
         def save_in_database(self):
-            # chart()
+            chart()
             # set a timer (1 second)
             Timer(3, self.save_in_database).start()
             conn = sql.connect('twitter.db')
