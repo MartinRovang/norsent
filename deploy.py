@@ -180,32 +180,35 @@ def foo():
 
 @app.route("/tweet")
 def chart():
-    conn = sql.connect("twitter.db")
-    df = pd.read_sql("SELECT * FROM users",conn)
-    G = df['what'].astype(float).values
-    df.sort_values('data1', inplace=True)
-    df['date'] = pd.to_datetime(df['data1'], unit='ms')
-    df.set_index('date', inplace=True)
-    init_length = len(df)
-    df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-    df = df_resample_sizes(df,maxlen=500)
-    X = df.index
-    Y = df.sentiment_smoothed.values
-    Y2 = df.volume.values
-    # sent = [408,547,675,734]
-    # values = [408,547,675,734]
-    labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
-    # if len(B) < len(Y):
-    #     L = strftime('%H:%M', gmtime())
-    #     print(L)
-    #     B.append(L)
-    #     print(B)
-    # if len(B) == len(Y):
-    #     B = [w.replace(':', '.') for w in B]
-    #     B = np.array(B)
-    #     labels = B.astype(float)
-    #     print(labels)
-    return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,50) ,labels = labels)
+    try:
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users",conn)
+        G = df['what'].astype(float).values
+        df.sort_values('data1', inplace=True)
+        df['date'] = pd.to_datetime(df['data1'], unit='ms')
+        df.set_index('date', inplace=True)
+        init_length = len(df)
+        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+        df = df_resample_sizes(df,maxlen=500)
+        X = df.index
+        Y = df.sentiment_smoothed.values
+        Y2 = df.volume.values
+        # sent = [408,547,675,734]
+        # values = [408,547,675,734]
+        labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
+        # if len(B) < len(Y):
+        #     L = strftime('%H:%M', gmtime())
+        #     print(L)
+        #     B.append(L)
+        #     print(B)
+        # if len(B) == len(Y):
+        #     B = [w.replace(':', '.') for w in B]
+        #     B = np.array(B)
+        #     labels = B.astype(float)
+        #     print(labels)
+        return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,20) ,labels = labels)
+    except Exception as e:
+        print(str(e))
 
 
 @app.route('/')
