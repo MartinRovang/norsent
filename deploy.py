@@ -112,7 +112,6 @@ def foo():
             super().__init__()
 
         def save_in_database(self):
-            chart()
             # set a timer (1 second)
             Timer(3, self.save_in_database).start()
             conn = sql.connect('twitter.db')
@@ -213,7 +212,7 @@ def chart():
 
 @app.route('/')
 def home():
-
+    chart()
     return render_template("home.html")
 
 
