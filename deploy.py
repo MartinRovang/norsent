@@ -98,7 +98,6 @@ def foo():
         data = []
         sent = []
         lock = None
-        parti = "trump"
 
         def __init__(self, lock):
 
@@ -133,10 +132,7 @@ def foo():
 
         def on_data(self, data):
             try:
-                #print('data')
                 data = json.loads(data)
-                # there are records like that:
-                # {'limit': {'track': 14667, 'timestamp_ms': '1520216832822'}}
                 if 'truncated' not in data:
                     #print(data)
                     return True
@@ -147,13 +143,7 @@ def foo():
                 time_ms = data['timestamp_ms']
                 vs = analyzer.polarity_scores(tweet)
                 sentiment = vs['compound']
-                # print(sentiment)
-                # print(tweet)
-                # print(time_ms)
                 time.sleep(1)
-                #print(time_ms, tweet, sentiment)
-
-                # append to data list (to be saved every 1 second)
                 with self.lock:
                     self.data.append((time_ms, tweet, sentiment))
             except KeyError as e:
@@ -169,7 +159,7 @@ def foo():
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            twitterStream.filter(track=["Trump"])
+            twitterStream.filter(track=["Trump","Twitter"])
         except Exception as e:
             print(str(e))
             time.sleep(5)
@@ -210,10 +200,54 @@ def chart():
         print(str(e))
 
 
+
+
+
+
+
+
 @app.route('/')
 def home():
     chart()
-    return render_template("index.html")
+    conn = sql.connect("twitter.db")
+    df = pd.read_sql("SELECT * FROM users",conn)
+    df['Trump'] = df['sent'].str.contains('Trump')
+    df['Twitter'] = df['sent'].str.contains('Twitter')
+    G = df['Trump'].astype(float).values
+    Gtw = df['Twitter'].astype(float).values
+    df.sort_values('data1', inplace=True)
+    df['date'] = pd.to_datetime(df['data1'], unit='ms')
+    df.set_index('date', inplace=True)
+    init_length = len(df)
+    df['sentiment_smoothed'] = df['Trump'].rolling(int(len(df)/5)).mean()
+    df['sentiment_smoothedtw'] = df['Twitter'].rolling(int(len(df)/5)).mean()
+    df = df_resample_sizes(df,maxlen=125)
+    X = df.index
+    Y = df.sentiment_smoothed.values
+    Ytw = df.sentiment_smoothedtw.values
+    Y2 = df.volume.values
+    df['Trend'] = Y
+    df['Trendtw'] = Ytw
+    print(df['Trend'].values)
+    print(df['Trendtw'].values)
+    if abs(df['Trend'].values[0]) < abs(df['Trend'].values[-1]):
+        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
+        if abs(df['Trendtw'].values[0]) < abs(df['Trendtw'].values[-1]):
+            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+            twitterlink = 'https://i.imgur.com/6OVin7T.png'
+        else:
+            twitterlink = 'https://i.imgur.com/LpNWTl2.png'
+        return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
+    else:
+        if abs(df['Trendtw'].values[0]) < abs(df['Trendtw'].values[-1]):
+            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+            twitterlink = 'https://i.imgur.com/6OVin7T.png'
+        else:
+            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+            twitterlink = 'https://i.imgur.com/LpNWTl2.png'
+        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
+        return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
+
 
 
 @app.route('/kontakt')
