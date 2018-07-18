@@ -20,6 +20,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, Unicode, UnicodeText
 from sqlalchemy import create_engine, ForeignKey
 from tabledef import *
+import tweepy
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
@@ -141,6 +142,9 @@ def foo():
                 else:
                     tweet = unidecode(data['text'])
                 time_ms = data['timestamp_ms']
+                translator = Translator()
+                translations = translator.translate(str(tweet), dest='en')
+                tweet = translations.text
                 vs = analyzer.polarity_scores(tweet)
                 sentiment = vs['compound']
                 time.sleep(1)
@@ -209,6 +213,7 @@ def home():
     chart()
     conn = sql.connect("twitter.db")
     df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
+    print(df)
     df2 = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Twitter%'",conn)
     df.sort_values('data1', inplace=True)
     df2.sort_values('data1', inplace=True)
@@ -230,7 +235,7 @@ def home():
     Y2 = df.volume.values
     print(Y2)
     df['Trend'] = Y
-    if abs(df['Trend'].values[-1]) < abs(df['Trend'].values[0]):
+    if abs(df['Trend'].values[0]) < abs(df['Trend'].values[-1]):
         change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
         if abs(Ytw[0]) < abs(Ytw[-1]):
             changetw = abs(Ytw[-1])-abs(Ytw[0])
