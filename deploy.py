@@ -205,7 +205,7 @@ def chart():
         #     B = np.array(B)
         #     labels = B.astype(float)
         #     print(labels)
-        return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,10) ,labels = labels)
+        return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,80) ,labels = labels)
     except Exception as e:
         print(str(e))
 
