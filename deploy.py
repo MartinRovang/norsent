@@ -188,7 +188,7 @@ def chart():
         df.set_index('date', inplace=True)
         init_length = len(df)
         df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df,maxlen=150)
+        df = df_resample_sizes(df,maxlen=125)
         X = df.index
         Y = df.sentiment_smoothed.values
         Y2 = df.volume.values
@@ -205,7 +205,7 @@ def chart():
         #     B = np.array(B)
         #     labels = B.astype(float)
         #     print(labels)
-        return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,80) ,labels = labels)
+        return render_template('chart.html', vol=Y2 ,sent = movingavarage(G,25) ,labels = labels)
     except Exception as e:
         print(str(e))
 
@@ -213,10 +213,12 @@ def chart():
 @app.route('/')
 def home():
     chart()
-    return render_template("home.html")
+    return render_template("index.html")
 
 
-
+@app.route('/kontakt')
+def kontakt():
+    return render_template("kontakt.html")
 
 
 thread = threading.Thread(target=foo)
