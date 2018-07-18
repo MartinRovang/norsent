@@ -218,7 +218,7 @@ def home():
 
 @app.route('/kontakt')
 def kontakt():
-    return render_template("kontakt.html")
+    return render_template("kontakt1.html")
 
 
 thread = threading.Thread(target=foo)
