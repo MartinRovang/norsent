@@ -166,13 +166,11 @@ def foo():
 
 
 
-
 @app.route("/tweet")
 def chart():
     try:
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users",conn)
-        G = df['what'].astype(float).values
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
         df.sort_values('data1', inplace=True)
         df['date'] = pd.to_datetime(df['data1'], unit='ms')
         df.set_index('date', inplace=True)
@@ -198,7 +196,7 @@ def chart():
         return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels)
     except Exception as e:
         print(str(e))
-
+        return e
 
 
 
@@ -210,40 +208,43 @@ def chart():
 def home():
     chart()
     conn = sql.connect("twitter.db")
-    df = pd.read_sql("SELECT * FROM users",conn)
-    df['Trump'] = df['sent'].str.contains('Trump')
-    df['Twitter'] = df['sent'].str.contains('Twitter')
-    G = df['Trump'].astype(float).values
-    Gtw = df['Twitter'].astype(float).values
+    df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
+    df2 = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Twitter%'",conn)
     df.sort_values('data1', inplace=True)
+    df2.sort_values('data1', inplace=True)
     df['date'] = pd.to_datetime(df['data1'], unit='ms')
+    df2['date'] = pd.to_datetime(df2['data1'], unit='ms')
     df.set_index('date', inplace=True)
-    init_length = len(df)
-    df['sentiment_smoothed'] = df['Trump'].rolling(int(len(df)/5)).mean()
-    df['sentiment_smoothedtw'] = df['Twitter'].rolling(int(len(df)/5)).mean()
-    df = df_resample_sizes(df,maxlen=125)
+    df2.set_index('date', inplace=True)
+    df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+    df = df_resample_sizes(df,maxlen=100)
     X = df.index
     Y = df.sentiment_smoothed.values
-    Ytw = df.sentiment_smoothedtw.values
+    df2['sentiment_smoothed'] = df2['what'].rolling(int(len(df2)/5)).mean()
+    df2 = df_resample_sizes(df2,maxlen=100)
+    df2 = df2.dropna()
+    print(df2)
+    Ytw = df2.sentiment_smoothed.values
+    # Ytw = 2
+    Y2tw = df2.volume.values
     Y2 = df.volume.values
+    print(Y2)
     df['Trend'] = Y
-    df['Trendtw'] = Ytw
-    print(df['Trend'].values)
-    print(df['Trendtw'].values)
-    if abs(df['Trend'].values[0]) < abs(df['Trend'].values[-1]):
+    if abs(df['Trend'].values[-1]) < abs(df['Trend'].values[0]):
         change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
-        if abs(df['Trendtw'].values[0]) < abs(df['Trendtw'].values[-1]):
-            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+        if abs(Ytw[0]) < abs(Ytw[-1]):
+            changetw = abs(Ytw[-1])-abs(Ytw[0])
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
+            changetw = abs(Ytw[-1])-abs(Ytw[0])
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
     else:
-        if abs(df['Trendtw'].values[0]) < abs(df['Trendtw'].values[-1]):
-            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+        if abs(Ytw[0]) < abs(Ytw[-1]):
+            changetw = abs(Ytw[-1])-abs(Ytw[0])
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
-            changetw = abs(df['Trendtw'].values[-1])-abs(df['Trendtw'].values[0])
+            changetw = abs(Ytw[-1])-abs(Ytw[0])
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
         change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
