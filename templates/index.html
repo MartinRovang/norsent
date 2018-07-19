@@ -2,6 +2,7 @@
 <html lang="en">
 
   <head>
+      <meta http-equiv="refresh" content="5" />
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -13,7 +14,6 @@
 
     <!-- Bootstrap core CSS -->
     <link href="{{url_for('static', filename ='vendor/bootstrap/css/bootstrap.min.css' )}}" rel="stylesheet">
-
     <!-- Custom styles for this template -->
     <style>
       body {
@@ -87,19 +87,20 @@
           <br>
           <br>
           <div align="left">
-          <center>
+    <center>
             <b><h1>Liste over emner:</h1></b>
             <br>
-            
             <h3><a href="https://norsent.herokuapp.com/trump">Trump</a>:  <font color="{{colortr}}">{{change}}</font> poeng <img src="{{Trumplink}}" style="width:25px;height:25px;">. Volum: {{trumpvol}}
             <br>
           <h3><a href="https://norsent.herokuapp.com/putin">Putin</a>:  <font color="{{colorput}}">{{changetw}}</font> poeng <img src="{{twitterlink}}" style="width:25px;height:25px;">. Volum: {{putinvol}}
-          </h3>  
-          </div>
-            </center>
-        </div>
-      </div>
+          </h3>
+        </center>
     </div>
+  </div>
+</div>
+</body>
+
+</html>
 
 
 
@@ -110,4 +111,3 @@
 
   </body>
 
-</html>
