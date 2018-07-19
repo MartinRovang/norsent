@@ -71,7 +71,7 @@
               data : [{% for item in sent %}
                           {{item}},
                         {% endfor %}],
-            label: "Trump",
+            label: "{{name}}",
             borderColor: "#3e95cd",
             fill: false
           },
@@ -80,7 +80,7 @@
       options: {
         title: {
           display: true,
-          text: 'Følelse rundt Trump ved å analysere twittermeldinger.'
+          text: 'Følelse rundt {{name}} ved å analysere twittermeldinger.'
         }
       }
     });
@@ -103,7 +103,7 @@
           labels:labels,
         datasets: [{ 
               data : data,
-            label: "Trump",
+            label: "{{name}}",
             borderColor: "#3e95cd",
             fill: false
           },

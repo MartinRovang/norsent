@@ -156,23 +156,22 @@ def foo():
             return True
 
 
-
     while True:
 
         try:
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            twitterStream.filter(track=["Trump","Twitter"])
+            twitterStream.filter(track=["Trump","Putin"])
         except Exception as e:
             print(str(e))
             time.sleep(5)
 
 
-
-@app.route("/tweet")
+@app.route("/trump")
 def chart():
     try:
+        name = 'Trump'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
         df.sort_values('data1', inplace=True)
@@ -197,7 +196,42 @@ def chart():
         #     B = np.array(B)
         #     labels = B.astype(float)
         #     print(labels)
-        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels)
+        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels,name = name)
+    except Exception as e:
+        print(str(e))
+        return e
+
+
+@app.route("/putin")
+def chart2():
+    try:
+        name = 'Putin'
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
+        df.sort_values('data1', inplace=True)
+        df['date'] = pd.to_datetime(df['data1'], unit='ms')
+        df.set_index('date', inplace=True)
+        init_length = len(df)
+        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+        df = df_resample_sizes(df,maxlen=100)
+        X = df.index
+        Y = df.sentiment_smoothed.values
+        Y2 = df.volume.values
+        # sent = [408,547,675,734]
+        # values = [408,547,675,734]
+        labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
+        # if len(B) < len(Y):
+        #     L = strftime('%H:%M', gmtime())
+        #     print(L)
+        #     B.append(L)
+        #     print(B)
+        # if len(B) == len(Y):
+        #     B = [w.replace(':', '.') for w in B]
+        #     B = np.array(B)
+        #     labels = B.astype(float)
+        #     print(labels)
+        print(df)
+        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels, name = name)
     except Exception as e:
         print(str(e))
         return e
@@ -206,15 +240,11 @@ def chart():
 
 
 
-
-
 @app.route('/')
 def home():
-    chart()
     conn = sql.connect("twitter.db")
     df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
-    print(df)
-    df2 = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Twitter%'",conn)
+    df2 = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
     df.sort_values('data1', inplace=True)
     df2.sort_values('data1', inplace=True)
     df['date'] = pd.to_datetime(df['data1'], unit='ms')
@@ -234,24 +264,23 @@ def home():
     Y2tw = df2.volume.values
     Y2 = df.volume.values
     print(Y2)
-    df['Trend'] = Y
-    if abs(df['Trend'].values[0]) < abs(df['Trend'].values[-1]):
-        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
-        if abs(Ytw[0]) < abs(Ytw[-1]):
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+    if np.mean(Y) > 0:
+        change = np.mean(Y)
+        if np.mean(Ytw) > 0:
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
     else:
-        if abs(Ytw[0]) < abs(Ytw[-1]):
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+        if np.mean(Ytw) > 0:
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
-        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
+        change = np.mean(Y)
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
 
 
