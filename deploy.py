@@ -210,7 +210,6 @@ def chart():
 
 @app.route('/')
 def home():
-    chart()
     conn = sql.connect("twitter.db")
     df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
     print(df)
@@ -234,24 +233,23 @@ def home():
     Y2tw = df2.volume.values
     Y2 = df.volume.values
     print(Y2)
-    df['Trend'] = Y
-    if abs(df['Trend'].values[0]) < abs(df['Trend'].values[-1]):
-        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
-        if abs(Ytw[0]) < abs(Ytw[-1]):
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+    if np.mean(Y) > 0:
+        change = np.mean(Y)
+        if np.mean(Ytw) > 0:
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
     else:
-        if abs(Ytw[0]) < abs(Ytw[-1]):
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+        if np.mean(Ytw) > 0:
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
         else:
-            changetw = abs(Ytw[-1])-abs(Ytw[0])
+            changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
-        change = abs(df['Trend'].values[-1])-abs(df['Trend'].values[0])
+        change = np.mean(Y)
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png', changetw = '%.4f'%changetw,twitterlink = twitterlink)
 
 
