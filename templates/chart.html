@@ -65,7 +65,7 @@
       type: 'line',
       data: {
           labels: [{% for item in labels %}
-                          {{item}},
+                          {{""}},
                         {% endfor %}],
         datasets: [{ 
               data : [{% for item in sent %}
@@ -93,7 +93,7 @@
                           {{item}},
                         {% endfor %}];
       let labels =  [{% for item in labels %}
-                          {{item}},
+                          {{""}},
                         {% endfor %}];
                         var ctx = document.getElementById("barchart");
                 var barchart = new Chart(ctx, {

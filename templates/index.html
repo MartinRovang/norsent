@@ -79,7 +79,7 @@
             <br>
             Her er -1 veldig negativt og 1 er veldig positivt. Herfra tas gjennomsnittet av tidligere verdier og gir en positiv eller negativ trend.
             <br>
-            Hosting på heroku med gratis bruker sover hver 30 min hvis den står inaktiv og dermed resette databasen, dette gjør at grafen er nesten tom for datapunkter.
+            Hosting på heroku med gratis bruker sover hver 30 min hvis den står inaktiv og dermed resette databasen, dette gjør at grafene kan være nesten tom for datapunkter.
             </b>
             <br>
           <ul class="list-unstyled">
@@ -90,10 +90,12 @@
           <center>
             <b><h1>Liste over emner:</h1></b>
             <br>
-            <a href="https://norsent.herokuapp.com/trump">Trump</a></b> <img src="{{Trumplink}}" style="width:25px;height:25px;">: {{change}} poeng. Volum: {{trumpvol}}
+            
+            <h3><a href="https://norsent.herokuapp.com/trump">Trump</a>:  <font color="{{colortr}}">{{change}}</font> poeng <img src="{{Trumplink}}" style="width:25px;height:25px;">. Volum: {{trumpvol}}
             <br>
-            <a href="https://norsent.herokuapp.com/putin">Putin</a></b> <img src="{{twitterlink}}" style="width:25px;height:25px;">: {{changetw}} poeng. Volum: {{putinvol}}
-              </div>
+          <h3><a href="https://norsent.herokuapp.com/putin">Putin</a>:  <font color="{{colorput}}">{{changetw}}</font> poeng <img src="{{twitterlink}}" style="width:25px;height:25px;">. Volum: {{putinvol}}
+          </h3>  
+          </div>
             </center>
         </div>
       </div>

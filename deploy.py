@@ -269,21 +269,27 @@ def home():
         if np.mean(Ytw) > 0:
             changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
+            colorput = "green"
         else:
             changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
+            colorput = "red"
+        colortr = "green"
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', \
-        changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2))
+        changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2), colortr = colortr, colorput = colorput)
     else:
         if np.mean(Ytw) > 0:
             changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/6OVin7T.png'
+            colorput = "green"
         else:
             changetw = np.mean(Ytw)
             twitterlink = 'https://i.imgur.com/LpNWTl2.png'
+            colorput = "red"
         change = np.mean(Y)
+        colortr = "red"
         return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png',\
-         changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2))
+         changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2), colortr = colortr, colorput = colorput)
 
 
 
