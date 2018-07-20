@@ -20,6 +20,12 @@
         padding-top: 56px;
       }
     }
+    #persons {
+      font-size: 2em;
+    }
+    #persons img {
+      margin-left: 20px;
+    }
   </style>
 </head>
 
@@ -84,16 +90,8 @@
                 <h1>Liste over emner:</h1>
               </b>
               <br>
-              <h3>
-                <a href="https://norsent.herokuapp.com/trump">Trump</a>:
-                <font color="{{colortr}}">{{change}}</font> poeng
-                <img src="{{Trumplink}}" style="width:25px;height:25px;">. Volum: {{trumpvol}}
-                <br>
-                <h3>
-                  <a href="https://norsent.herokuapp.com/putin">Putin</a>:
-                  <font color="{{colorput}}">{{changetw}}</font> poeng
-                  <img src="{{twitterlink}}" style="width:25px;height:25px;">. Volum: {{putinvol}}
-                </h3>
+              <div id='persons'>
+              </div>
             </center>
           </div>
       </div>
@@ -103,18 +101,55 @@
     <script src="{{url_for('static', filename ='vendor/bootstrap/js/bootstrap.bundle.min.js' )}}"></script>
     <script>
       const maxWaitingTimePerInterval = 5000;
-      setInterval(function () {
+      function getPersons() {
         $.ajax({
           url: "/api/changes",
           type: "get",
           success: function (response) {
-            console.log(JSON.parse(response));
+            const res = JSON.parse(JSON.stringify(response));
+            const personsContainer = document.getElementById('persons');
+
+            var personElements = res.persons.map(function (person, index) {
+              const container = document.createElement('div');
+              const linkTo = document.createElement('a');
+              const points = document.createElement('p');
+              const img = document.createElement('img');
+              const br = document.createElement('br');
+
+              container.className = "container-person";
+
+              linkTo.href = person.link;
+              linkTo.innerText = person.name;
+
+              points.style = 'color:' + person.color;
+              let sign = "";
+              if (person.points > 0) {
+                sign = "+";
+              }
+              points.innerText = sign + person.points + " poeng";
+
+              img.src = person.arrow;
+              img.style = "width:25px;height:25px";
+              img.innerText = "Volum: " + person.volume;
+
+              container.appendChild(linkTo);
+              container.appendChild(img);
+              container.appendChild(points);
+
+              return container;
+            });
+            personsContainer.innerHTML = null;
+            personElements.map(function(x) {
+              personsContainer.innerHTML += x.outerHTML;
+            });
           },
           error: function (xhr) {
             //Do Something to handle error
           }
         });
-      }, maxWaitingTimePerInterval);
+      };
+      getPersons();
+      setInterval(getPersons, maxWaitingTimePerInterval);
     </script>
 </body>
 

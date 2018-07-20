@@ -78,14 +78,25 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
  # trump sine point, arrow, volume, color
 class PersonViewModel:
-    def __init__(self,points,arrow,volume,color):
+    def __init__(self,points,arrow,volume,color,link,name):
         self.points = points
         self.arrow = arrow
         self.volume = volume
         self.color = color
+        self.link = link
+        self.name = name
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
+        # return json.dumps(self, default=lambda o: o.__dict__, 
+        #     sort_keys=True, indent=4)
+        return {
+            "points": self.points,
+            "arrow": self.arrow,
+            "volume": self.volume,
+            "color": self.color,
+            "link": self.link,
+            "name": self.name
+        }
+
 def foo():
     print("Started")
     sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
@@ -163,7 +174,6 @@ def foo():
                 #print(data)
                 print(str(e))
             return True
-
 
     while True:
 
@@ -257,19 +267,19 @@ def setIndex(df):
 def averageOfX(df, x):
     df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/x)).mean()
 
-def create_person_viewmodel(averagePoints, volume):
+def create_person_viewmodel(averagePoints, volume,link,name):
     arrow = 'https://i.imgur.com/LpNWTl2.png'
     color = 'red'
     if averagePoints > 0:
         arrow = 'https://i.imgur.com/6OVin7T.png'
         color = 'green'
 
-    return PersonViewModel(averagePoints, arrow, volume, color)
+    return PersonViewModel(averagePoints, arrow, volume, color, link, name)
 
 def create_changes_response():
     conn = sql.connect("twitter.db")
-    trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
-    putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
+    trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'", conn)
+    putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'", conn)
 
     sort_values(trumpDf)
     sort_values(putinDf)
@@ -294,18 +304,18 @@ def create_changes_response():
     putinVolume = int(np.sum(putinDf.volume.values))
     trumpVolume = int(np.sum(trumpDf.volume.values))
 
-    trumpAveragePoints = float(np.mean(trumppoints))
-    putinAveragePoints = float(np.mean(putinpoints))
+    trumpAveragePoints = float('%.4f'%np.mean(trumppoints))
+    putinAveragePoints = float('%.4f'%np.mean(putinpoints))
 
-    trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume)
-    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume)
+    trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
+    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
     
     return [trumpViewModel.toJSON(), putinViewModel.toJSON()]
 
 @app.route('/api/changes')
 def changes():
-    response = create_changes_response()
-    return Response(json.dumps(response), mimetype='application/json')
+    persons = {"persons": create_changes_response()}
+    return jsonify(persons)
 
 @app.route('/')
 def home():
