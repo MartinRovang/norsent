@@ -105,10 +105,10 @@
       const maxWaitingTimePerInterval = 5000;
       setInterval(function () {
         $.ajax({
-          url: "/",
+          url: "/api/changes",
           type: "get",
           success: function (response) {
-            console.log("woho", response);
+            console.log(JSON.parse(response));
           },
           error: function (xhr) {
             //Do Something to handle error

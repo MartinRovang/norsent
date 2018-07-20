@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, abort, make_response, send_file
+from flask import Flask, flash, redirect, render_template, request, session, abort, make_response, send_file, jsonify, Response
 import json
 import sqlite3 as sql
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -76,7 +76,16 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
     return df
 
-
+ # trump sine point, arrow, volume, color
+class PersonViewModel:
+    def __init__(self,points,arrow,volume,color):
+        self.points = points
+        self.arrow = arrow
+        self.volume = volume
+        self.color = color
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
 def foo():
     print("Started")
     sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
@@ -236,9 +245,67 @@ def chart2():
         print(str(e))
         return e
 
+def sort_values(df):
+    df.sort_values('data1', inplace=True)
 
+def toDateTime(df):
+    df['date'] = pd.to_datetime(df['data1'], unit='ms')
 
+def setIndex(df):
+    df.set_index('date', inplace=True)
 
+def averageOfX(df, x):
+    df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/x)).mean()
+
+def create_person_viewmodel(averagePoints, volume):
+    arrow = 'https://i.imgur.com/LpNWTl2.png'
+    color = 'red'
+    if averagePoints > 0:
+        arrow = 'https://i.imgur.com/6OVin7T.png'
+        color = 'green'
+
+    return PersonViewModel(averagePoints, arrow, volume, color)
+
+def create_changes_response():
+    conn = sql.connect("twitter.db")
+    trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
+    putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
+
+    sort_values(trumpDf)
+    sort_values(putinDf)
+
+    toDateTime(trumpDf)
+    toDateTime(putinDf)
+
+    setIndex(trumpDf)    
+    setIndex(putinDf)    
+    
+    averageOfX(trumpDf, 5)
+    trumpDf = df_resample_sizes(trumpDf,maxlen=100)
+    X = trumpDf.index
+    trumppoints = trumpDf.sentiment_smoothed.values
+    
+    averageOfX(putinDf, 5)
+    putinDf = df_resample_sizes(putinDf,maxlen=100)
+    putinDf = putinDf.dropna()
+
+    putinpoints = putinDf.sentiment_smoothed.values
+
+    putinVolume = int(np.sum(putinDf.volume.values))
+    trumpVolume = int(np.sum(trumpDf.volume.values))
+
+    trumpAveragePoints = float(np.mean(trumppoints))
+    putinAveragePoints = float(np.mean(putinpoints))
+
+    trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume)
+    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume)
+    
+    return [trumpViewModel.toJSON(), putinViewModel.toJSON()]
+
+@app.route('/api/changes')
+def changes():
+    response = create_changes_response()
+    return Response(json.dumps(response), mimetype='application/json')
 
 @app.route('/')
 def home():
