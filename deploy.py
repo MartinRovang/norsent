@@ -187,24 +187,24 @@ def foo():
 
 
 
-def new_person(search):
-    conn = sql.connect('twitter.db')
-    c = conn.cursor()
-    tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
-    try:
-        for tweet in tweets:
-            data = []
-            translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
-            vs = analyzer.polarity_scores(translations.text)
-            data.append((1, translations.text, vs['compound']))
-            c.execute('BEGIN TRANSACTION')
-            c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
-            conn.commit()
-            print(data)
-            print("DATA INSERT %s"%search)
-    except Exception as e:
-        print("FAILED %s"%e)
-        pass
+# def new_person(search):
+#     conn = sql.connect('twitter.db')
+#     c = conn.cursor()
+#     tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
+#     try:
+#         for tweet in tweets:
+#             data = []
+#             translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
+#             vs = analyzer.polarity_scores(translations.text)
+#             data.append((1, translations.text, vs['compound']))
+#             c.execute('BEGIN TRANSACTION')
+#             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
+#             conn.commit()
+#             print(data)
+#             print("DATA INSERT %s"%search)
+#     except Exception as e:
+#         print("FAILED %s"%e)
+#         pass
 
 
 def floatify(lst):
