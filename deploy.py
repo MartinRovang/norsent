@@ -138,7 +138,7 @@ def foo():
                     try:
                             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", self.data)
                             conn.commit()
-                            print("DATA INSERT")
+
                     except Exception as e:
                         print(str(e))
                     # c.execute('COMMIT')
@@ -181,9 +181,9 @@ def foo():
             print(str(e))
             time.sleep(5)
 
-auth1 = tweepy.OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
-auth1.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
-api1 = tweepy.API(auth1)
+# auth1 = tweepy.OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
+# auth1.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
+# api1 = tweepy.API(auth1)
 
 
 
