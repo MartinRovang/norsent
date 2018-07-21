@@ -58,8 +58,9 @@
 <body>
 
     <canvas id="linechart" width="800" height="400"></canvas>
-
     <script>
+
+
       Chart.defaults.global.responsive = false;
     new Chart(document.getElementById("linechart"), {
       type: 'line',
@@ -89,6 +90,7 @@
     <canvas id="barchart" width="800" height="400"></canvas>
     
     <script>
+
       let data = [{% for item in vol %}
                           {{item}},
                         {% endfor %}];
@@ -115,7 +117,6 @@
           text: 'Volum'
         }
                 }});
-
     </script> 
 
 

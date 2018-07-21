@@ -41,8 +41,8 @@ os.chdir(os.path.realpath(os.path.dirname(__file__)))
 engine = create_engine('sqlite:///twitter.db', echo=True)
 Session = sessionmaker(bind=engine)
 
-
-
+translator = Translator()
+analyzer = SentimentIntensityAnalyzer()
 
 
 
@@ -97,17 +97,13 @@ class PersonViewModel:
             "name": self.name
         }
 
+
 def foo():
     print("Started")
     sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
     os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
-    analyzer = SentimentIntensityAnalyzer()
 
-
-    #Connect database
-    # conn = sqlite3.connect('twitter.db')
-    # c = conn.cursor()
 
 
 
@@ -119,7 +115,6 @@ def foo():
         data = []
         sent = []
         lock = None
-
         def __init__(self, lock):
 
             # create lock
@@ -136,14 +131,14 @@ def foo():
             Timer(3, self.save_in_database).start()
             conn = sql.connect('twitter.db')
             c = conn.cursor()
+                
             with self.lock:
                 if len(self.data):
                     c.execute('BEGIN TRANSACTION')
                     try:
                             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", self.data)
                             conn.commit()
-                            print("INSERTS DATA")
-                            # print("test")
+                            print("DATA INSERT")
                     except Exception as e:
                         print(str(e))
                     # c.execute('COMMIT')
@@ -162,7 +157,6 @@ def foo():
                 else:
                     tweet = unidecode(data['text'])
                 time_ms = data['timestamp_ms']
-                translator = Translator()
                 translations = translator.translate(str(tweet), dest='en')
                 tweet = translations.text
                 vs = analyzer.polarity_scores(tweet)
@@ -171,7 +165,7 @@ def foo():
                 with self.lock:
                     self.data.append((time_ms, tweet, sentiment))
             except KeyError as e:
-                #print(data)
+                print("FAILED ON_DATA %s"%e)
                 print(str(e))
             return True
 
@@ -181,11 +175,41 @@ def foo():
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            twitterStream.filter(track=["Trump","Putin"])
+            twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
+
         except Exception as e:
             print(str(e))
             time.sleep(5)
 
+auth1 = tweepy.OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
+auth1.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
+api1 = tweepy.API(auth1)
+
+
+
+def new_person(search):
+    conn = sql.connect('twitter.db')
+    c = conn.cursor()
+    tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
+    try:
+        for tweet in tweets:
+            data = []
+            translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
+            vs = analyzer.polarity_scores(translations.text)
+            data.append((1, translations.text, vs['compound']))
+            c.execute('BEGIN TRANSACTION')
+            c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
+            conn.commit()
+            print(data)
+            print("DATA INSERT %s"%search)
+    except Exception as e:
+        print("FAILED %s"%e)
+        pass
+
+
+def floatify(lst):
+    floated_list = [float(i) for i in lst]
+    return floated_list
 
 @app.route("/trump")
 def chart():
@@ -273,22 +297,30 @@ def create_person_viewmodel(averagePoints, volume,link,name):
     if averagePoints > 0:
         arrow = 'https://i.imgur.com/6OVin7T.png'
         color = 'green'
-
     return PersonViewModel(averagePoints, arrow, volume, color, link, name)
 
 def create_changes_response():
     conn = sql.connect("twitter.db")
     trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'", conn)
     putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'", conn)
+    listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
+    gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'", conn)
+
 
     sort_values(trumpDf)
     sort_values(putinDf)
+    sort_values(listhaugDf)
+    sort_values(gahrstoreDf)
 
     toDateTime(trumpDf)
     toDateTime(putinDf)
+    toDateTime(listhaugDf)
+    toDateTime(gahrstoreDf)
 
     setIndex(trumpDf)    
-    setIndex(putinDf)    
+    setIndex(putinDf)
+    setIndex(listhaugDf)
+    setIndex(gahrstoreDf)
     
     averageOfX(trumpDf, 5)
     trumpDf = df_resample_sizes(trumpDf,maxlen=100)
@@ -307,10 +339,18 @@ def create_changes_response():
     trumpAveragePoints = float('%.4f'%np.mean(trumppoints))
     putinAveragePoints = float('%.4f'%np.mean(putinpoints))
 
+    listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
+    listhaugVolume = len(floatify(listhaugDf['what'].values))
+
+    gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)))
+    gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
+
     trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
     putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
+    listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com','Sylvi Listhaug')
+    gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com','Jonas Gahr Støre')
     
-    return [trumpViewModel.toJSON(), putinViewModel.toJSON()]
+    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
 
 @app.route('/api/changes')
 def changes():
@@ -319,66 +359,42 @@ def changes():
 
 @app.route('/')
 def home():
-    conn = sql.connect("twitter.db")
-    df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
-    df2 = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
-    df.sort_values('data1', inplace=True)
-    df2.sort_values('data1', inplace=True)
-    df['date'] = pd.to_datetime(df['data1'], unit='ms')
-    df2['date'] = pd.to_datetime(df2['data1'], unit='ms')
-    df.set_index('date', inplace=True)
-    df2.set_index('date', inplace=True)
-    df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-    df = df_resample_sizes(df,maxlen=100)
-    X = df.index
-    Y = df.sentiment_smoothed.values
-    df2['sentiment_smoothed'] = df2['what'].rolling(int(len(df2)/5)).mean()
-    df2 = df_resample_sizes(df2,maxlen=100)
-    df2 = df2.dropna()
-    print(df2)
-    Ytw = df2.sentiment_smoothed.values
-    # Ytw = 2
-    Y2tw = df2.volume.values
-    Y2 = df.volume.values
-    print(Y2)
-    if np.mean(Y) > 0:
-        change = np.mean(Y)
-        if np.mean(Ytw) > 0:
-            changetw = np.mean(Ytw)
-            twitterlink = 'https://i.imgur.com/6OVin7T.png'
-            colorput = "green"
-        else:
-            changetw = np.mean(Ytw)
-            twitterlink = 'https://i.imgur.com/LpNWTl2.png'
-            colorput = "red"
-        colortr = "green"
-        return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/6OVin7T.png', \
-        changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2), colortr = colortr, colorput = colorput)
-    else:
-        if np.mean(Ytw) > 0:
-            changetw = np.mean(Ytw)
-            twitterlink = 'https://i.imgur.com/6OVin7T.png'
-            colorput = "green"
-        else:
-            changetw = np.mean(Ytw)
-            twitterlink = 'https://i.imgur.com/LpNWTl2.png'
-            colorput = "red"
-        change = np.mean(Y)
-        colortr = "red"
-        return render_template("index.html", change = '%.4f'%change,Trumplink = 'https://i.imgur.com/LpNWTl2.png',\
-         changetw = '%.4f'%changetw,twitterlink = twitterlink, putinvol = np.sum(Y2tw), trumpvol = np.sum(Y2), colortr = colortr, colorput = colorput)
 
+    return render_template("index.html")
 
 
 @app.route('/kontakt')
 def kontakt():
+
     return render_template("kontakt1.html")
+
+
+
+
+
+# def load_persons():
+#     new_person("Listhaug")
+
+# def load_persons2():
+#     new_person("Jonas Gahr")
 
 
 thread = threading.Thread(target=foo)
 thread.start()
 
 
+
+
+# thread2 = threading.Thread(target=load_persons)
+# thread2.start()
+
+# thread3 = threading.Thread(target=load_persons2)
+# thread3.start()
+
+
+
+
+ 
 if __name__ == "__main__":
 
     app.run()

@@ -27,7 +27,13 @@
       margin-left: 20px;
     }
   </style>
+<link rel="icon" type="image/png" sizes="32x32" href="http://d1ujqdpfgkvqfi.cloudfront.net/favicon-generator/htdocs/favicons/2018-07-20/5cf3f591dfe7a46a6bad68ea512d180d.ico.png">
 </head>
+
+
+
+
+
 
 <body>
   <!-- Navigation -->
@@ -100,6 +106,7 @@
     <script src="{{url_for('static', filename ='vendor/jquery/jquery.min.js' )}}"></script>
     <script src="{{url_for('static', filename ='vendor/bootstrap/js/bootstrap.bundle.min.js' )}}"></script>
     <script>
+      
       const maxWaitingTimePerInterval = 5000;
       function getPersons() {
         $.ajax({
@@ -113,6 +120,7 @@
               const container = document.createElement('div');
               const linkTo = document.createElement('a');
               const points = document.createElement('p');
+              const volume = document.createElement('p');
               const img = document.createElement('img');
               const br = document.createElement('br');
 
@@ -130,11 +138,13 @@
 
               img.src = person.arrow;
               img.style = "width:25px;height:25px";
-              img.innerText = "Volum: " + person.volume;
+              
+              volume.innerText =  "Volum: " + person.volume;
 
               container.appendChild(linkTo);
               container.appendChild(img);
               container.appendChild(points);
+              container.appendChild(volume);
 
               return container;
             });
@@ -150,6 +160,8 @@
       };
       getPersons();
       setInterval(getPersons, maxWaitingTimePerInterval);
+
+
     </script>
 </body>
 
