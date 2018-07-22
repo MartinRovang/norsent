@@ -97,24 +97,25 @@ class PersonViewModel:
 
 
 
-# def new_person(search):
-#     conn = sql.connect('twitter.db')
-#     c = conn.cursor()
-#     tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
-#     c.execute("DELETE FROM users WHERE sent LIKE '%"+search+"%'")
-#     try:
-#         for tweet in tweets:
-#             data = []
-#             translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
-#             vs = analyzer.polarity_scores(translations.text)
-#             data.append((1, translations.text, vs['compound']))
-#             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
-#             conn.commit()
-#             print("DATA INSERT %s"%search)
+def new_person(search):
+    conn = sql.connect('twitter.db')
+    c = conn.cursor()
+    tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
+    c.execute("DELETE FROM users WHERE sent LIKE '%"+search+"%'")
+    try:
+        for tweet in tweets:
+            data = []
+            translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
+            vs = analyzer.polarity_scores(translations.text)
+            data.append((1, translations.text, vs['compound']))
+            c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
+            conn.commit()
+            print("DATA INSERT %s"%search)
+            print(translations.text)
             
-#     except Exception as e:
-#         print("FAILED %s"%e)
-#         pass
+    except Exception as e:
+        print("FAILED %s"%e)
+        pass
 
 
 # new_person("Jonas Gahr")
@@ -198,8 +199,8 @@ def foo():
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            # twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
-            twitterStream.filter(track=["Trump","Putin","Jonas Gahr"])
+            twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
+
 
         except Exception as e:
             print(str(e))
@@ -221,67 +222,87 @@ def chart():
         name = 'Trump'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
-        df.sort_values('data1', inplace=True)
-        df['date'] = pd.to_datetime(df['data1'], unit='ms')
-        df.set_index('date', inplace=True)
-        init_length = len(df)
-        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df,maxlen=100)
-        X = df.index
-        Y = df.sentiment_smoothed.values
-        Y2 = df.volume.values
-        # sent = [408,547,675,734]
-        # values = [408,547,675,734]
-        labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
-        # if len(B) < len(Y):
-        #     L = strftime('%H:%M', gmtime())
-        #     print(L)
-        #     B.append(L)
-        #     print(B)
-        # if len(B) == len(Y):
-        #     B = [w.replace(':', '.') for w in B]
-        #     B = np.array(B)
-        #     labels = B.astype(float)
-        #     print(labels)
-        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels,name = name)
+        Y = floatify(df['what'].values)[-100:]
+        labels = np.linspace(len(Y),0,len(Y))
+        return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
-        print(str(e))
+        print("Trump"+str(e)+"")
         return e
-
 
 @app.route("/putin")
 def chart2():
     try:
-        name = 'Putin'
+        name = 'putin'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
-        df.sort_values('data1', inplace=True)
-        df['date'] = pd.to_datetime(df['data1'], unit='ms')
-        df.set_index('date', inplace=True)
-        init_length = len(df)
-        df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
-        df = df_resample_sizes(df,maxlen=100)
-        X = df.index
-        Y = df.sentiment_smoothed.values
-        Y2 = df.volume.values
-        # sent = [408,547,675,734]
-        # values = [408,547,675,734]
-        labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
-        # if len(B) < len(Y):
-        #     L = strftime('%H:%M', gmtime())
-        #     print(L)
-        #     B.append(L)
-        #     print(B)
-        # if len(B) == len(Y):
-        #     B = [w.replace(':', '.') for w in B]
-        #     B = np.array(B)
-        #     labels = B.astype(float)
-        #     print(labels)
-        print(df)
-        return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels, name = name)
+        Y = floatify(df['what'].values)[-100:]
+        labels = np.linspace(len(Y),0,len(Y))
+        return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
-        print(str(e))
+        print("Trump"+str(e)+"")
         return e
+
+@app.route("/store")
+def chart3():
+    try:
+        name = 'Jonas Gahr Støre'
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'",conn)
+        Y = floatify(df['what'].values)[-100:]
+        labels = np.linspace(len(Y),0,len(Y))
+        return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
+    except Exception as e:
+        print("Trump"+str(e)+"")
+        return e
+
+
+@app.route("/listhaug")
+def chart4():
+    try:
+        name = 'Sylvi Listhaug'
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'",conn)
+        Y = floatify(df['what'].values)[-100:]
+        labels = np.linspace(len(Y),0,len(Y))
+        return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
+    except Exception as e:
+        print("Trump"+str(e)+"")
+        return e
+
+
+# @app.route("/putin")
+# def chart2():
+#     try:
+#         name = 'Putin'
+#         conn = sql.connect("twitter.db")
+#         df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
+#         df.sort_values('data1', inplace=True)
+#         df['date'] = pd.to_datetime(df['data1'], unit='ms')
+#         df.set_index('date', inplace=True)
+#         init_length = len(df)
+#         df['sentiment_smoothed'] = df['what'].rolling(int(len(df)/5)).mean()
+#         df = df_resample_sizes(df,maxlen=100)
+#         X = df.index
+#         Y = df.sentiment_smoothed.values
+#         Y2 = df.volume.values
+#         # sent = [408,547,675,734]
+#         # values = [408,547,675,734]
+#         labels = -np.round(np.linspace(len(Y2)/60,0,len(Y2)),2)
+#         # if len(B) < len(Y):
+#         #     L = strftime('%H:%M', gmtime())
+#         #     print(L)
+#         #     B.append(L)
+#         #     print(B)
+#         # if len(B) == len(Y):
+#         #     B = [w.replace(':', '.') for w in B]
+#         #     B = np.array(B)
+#         #     labels = B.astype(float)
+#         #     print(labels)
+#         print(df)
+#         return render_template('chart.html', vol=Y2 ,sent = Y ,labels = labels, name = name)
+#     except Exception as e:
+#         print(str(e))
+#         return e
 
 def sort_values(df):
     df.sort_values('data1', inplace=True)
@@ -307,55 +328,55 @@ def create_changes_response():
     conn = sql.connect("twitter.db")
     trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'", conn)
     putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'", conn)
-    # listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
+    listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
     gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'", conn)
 
 
-    sort_values(trumpDf)
-    sort_values(putinDf)
+    # sort_values(trumpDf)
+    # sort_values(putinDf)
     # sort_values(listhaugDf)
     # sort_values(gahrstoreDf)
 
-    toDateTime(trumpDf)
-    toDateTime(putinDf)
+    # toDateTime(trumpDf)
+    # toDateTime(putinDf)
     # toDateTime(listhaugDf)
     # toDateTime(gahrstoreDf)
 
-    setIndex(trumpDf)    
-    setIndex(putinDf)
+    # setIndex(trumpDf)    
+    # setIndex(putinDf)
     # setIndex(listhaugDf)
     # setIndex(gahrstoreDf)
     
-    averageOfX(trumpDf, 5)
-    trumpDf = df_resample_sizes(trumpDf,maxlen=100)
-    X = trumpDf.index
-    trumppoints = trumpDf.sentiment_smoothed.values
+    # averageOfX(trumpDf, 5)
+    # trumpDf = df_resample_sizes(trumpDf,maxlen=100)
+    # X = trumpDf.index
+    # trumppoints = trumpDf.sentiment_smoothed.values
     
-    averageOfX(putinDf, 5)
-    putinDf = df_resample_sizes(putinDf,maxlen=100)
-    putinDf = putinDf.dropna()
+    # averageOfX(putinDf, 5)
+    # putinDf = df_resample_sizes(putinDf,maxlen=100)
+    # putinDf = putinDf.dropna()
 
-    putinpoints = putinDf.sentiment_smoothed.values
+    # putinpoints = putinDf.sentiment_smoothed.values
 
-    putinVolume = int(np.sum(putinDf.volume.values))
-    trumpVolume = int(np.sum(trumpDf.volume.values))
+    putinVolume = len(floatify(putinDf['what'].values))
+    trumpVolume = len(floatify(trumpDf['what'].values))
 
-    trumpAveragePoints = float('%.4f'%np.mean(trumppoints))
-    putinAveragePoints = float('%.4f'%np.mean(putinpoints))
+    trumpAveragePoints = float('%.4f'%np.mean(floatify(trumpDf['what'].values)))
+    putinAveragePoints = float('%.4f'%np.mean(floatify(putinDf['what'].values)))
 
-    # listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
-    # listhaugVolume = len(floatify(listhaugDf['what'].values))
+    listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
+    listhaugVolume = len(floatify(listhaugDf['what'].values))
 
     gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)))
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
     trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
-    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
-    # listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com','Sylvi Listhaug')
-    gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com','Jonas Gahr Støre')
+    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/trump','Putin')
+    listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com/listhaug','Sylvi Listhaug')
+    gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com/store','Jonas Gahr Støre')
     
-    # return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
-    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+
 
 
 @app.route('/api/changes')

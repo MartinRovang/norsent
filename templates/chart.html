@@ -81,43 +81,43 @@
       options: {
         title: {
           display: true,
-          text: 'Følelse rundt {{name}} ved å analysere twittermeldinger.'
+          text: 'Følelse rundt {{name}} ved å analysere twittermeldinger.\n Her vises de siste 100 meldingene.'
         }
       }
     });
     </script> 
     
-    <canvas id="barchart" width="800" height="400"></canvas>
+    // <canvas id="barchart" width="800" height="400"></canvas>
     
-    <script>
+    // <script>
 
-      let data = [{% for item in vol %}
-                          {{item}},
-                        {% endfor %}];
-      let labels =  [{% for item in labels %}
-                          {{""}},
-                        {% endfor %}];
-                        var ctx = document.getElementById("barchart");
-                var barchart = new Chart(ctx, {
+    //   let data = [{% for item in vol %}
+    //                       {{item}},
+    //                     {% endfor %}];
+    //   let labels =  [{% for item in labels %}
+    //                       {{""}},
+    //                     {% endfor %}];
+    //                     var ctx = document.getElementById("barchart");
+    //             var barchart = new Chart(ctx, {
 
-      type: 'bar',
-      data: {
-          labels:labels,
-        datasets: [{ 
-              data : data,
-            label: "{{name}}",
-            borderColor: "#3e95cd",
-            fill: false
-          },
-        ]
-      },
-      options: {
-        title: {
-          display: true,
-          text: 'Volum'
-        }
-                }});
-    </script> 
+    //   type: 'bar',
+    //   data: {
+    //       labels:labels,
+    //     datasets: [{ 
+    //           data : data,
+    //         label: "{{name}}",
+    //         borderColor: "#3e95cd",
+    //         fill: false
+    //       },
+    //     ]
+    //   },
+    //   options: {
+    //     title: {
+    //       display: true,
+    //       text: 'Volum'
+    //     }
+    //             }});
+    // </script> 
 
 
 
