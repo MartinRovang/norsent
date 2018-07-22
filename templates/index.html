@@ -21,12 +21,31 @@
       }
     }
     #persons {
-      font-size: 2em;
+      font-size: 1em;
     }
     #persons img {
       margin-left: 20px;
     }
+
+.list_item {
+    float: left;
+    margin: 5px;
+    padding: 5px;
+    width: 200px;
+}
+#wrap {
+    width:460px;
+    column-count:2;
+    column-gap:20px;
+    -moz-column-count:2;
+    -moz-column-gap:20px;
+    -webkit-column-count:2;
+    -webkit-column-gap:20px;
+}
+
   </style>
+
+
 <link rel="icon" type="image/png" sizes="32x32" href="http://d1ujqdpfgkvqfi.cloudfront.net/favicon-generator/htdocs/favicons/2018-07-20/5cf3f591dfe7a46a6bad68ea512d180d.ico.png">
 </head>
 
@@ -86,8 +105,6 @@
             gjør at grafene kan være nesten tom for datapunkter.
           </b>
           <br>
-          <ul class="list-unstyled">
-          </ul>
           <br>
           <br>
           <div align="left">
@@ -95,9 +112,12 @@
               <b>
                 <h1>Liste over emner:</h1>
               </b>
-              <br>
+              <div id="wrap">
+              <div class="list_item">
               <div id='persons'>
               </div>
+            </div>
+          </div>
             </center>
           </div>
       </div>
