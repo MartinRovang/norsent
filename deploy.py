@@ -26,9 +26,6 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 from io import BytesIO
 import random
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import datetime
 import base64
@@ -98,11 +95,37 @@ class PersonViewModel:
         }
 
 
+
+
+# def new_person(search):
+#     conn = sql.connect('twitter.db')
+#     c = conn.cursor()
+#     tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
+#     c.execute("DELETE FROM users WHERE sent LIKE '%"+search+"%'")
+#     try:
+#         for tweet in tweets:
+#             data = []
+#             translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
+#             vs = analyzer.polarity_scores(translations.text)
+#             data.append((1, translations.text, vs['compound']))
+#             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
+#             conn.commit()
+#             print("DATA INSERT %s"%search)
+            
+#     except Exception as e:
+#         print("FAILED %s"%e)
+#         pass
+
+
+# new_person("Jonas Gahr")
+# new_person("Sylvi Listhaug")
+
+
+
 def foo():
-    print("Started")
+
     sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
     os.chdir(os.path.realpath(os.path.dirname(__file__)))
-
 
 
 
@@ -175,36 +198,17 @@ def foo():
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
+            # twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
+            twitterStream.filter(track=["Trump","Putin","Jonas Gahr"])
 
         except Exception as e:
             print(str(e))
             time.sleep(5)
 
-# auth1 = tweepy.OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
-# auth1.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
-# api1 = tweepy.API(auth1)
 
 
 
-# def new_person(search):
-#     conn = sql.connect('twitter.db')
-#     c = conn.cursor()
-#     tweets = tweepy.Cursor(api1.search, q= search , tweet_mode='extended').items(1000)
-#     try:
-#         for tweet in tweets:
-#             data = []
-#             translations = translator.translate(str(unidecode(tweet.full_text)), dest='en')
-#             vs = analyzer.polarity_scores(translations.text)
-#             data.append((1, translations.text, vs['compound']))
-#             c.execute('BEGIN TRANSACTION')
-#             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", data)
-#             conn.commit()
-#             print(data)
-#             print("DATA INSERT %s"%search)
-#     except Exception as e:
-#         print("FAILED %s"%e)
-#         pass
+
 
 
 def floatify(lst):
@@ -303,24 +307,24 @@ def create_changes_response():
     conn = sql.connect("twitter.db")
     trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'", conn)
     putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'", conn)
-    listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
+    # listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
     gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'", conn)
 
 
     sort_values(trumpDf)
     sort_values(putinDf)
-    sort_values(listhaugDf)
-    sort_values(gahrstoreDf)
+    # sort_values(listhaugDf)
+    # sort_values(gahrstoreDf)
 
     toDateTime(trumpDf)
     toDateTime(putinDf)
-    toDateTime(listhaugDf)
-    toDateTime(gahrstoreDf)
+    # toDateTime(listhaugDf)
+    # toDateTime(gahrstoreDf)
 
     setIndex(trumpDf)    
     setIndex(putinDf)
-    setIndex(listhaugDf)
-    setIndex(gahrstoreDf)
+    # setIndex(listhaugDf)
+    # setIndex(gahrstoreDf)
     
     averageOfX(trumpDf, 5)
     trumpDf = df_resample_sizes(trumpDf,maxlen=100)
@@ -339,18 +343,20 @@ def create_changes_response():
     trumpAveragePoints = float('%.4f'%np.mean(trumppoints))
     putinAveragePoints = float('%.4f'%np.mean(putinpoints))
 
-    listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
-    listhaugVolume = len(floatify(listhaugDf['what'].values))
+    # listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
+    # listhaugVolume = len(floatify(listhaugDf['what'].values))
 
     gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)))
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
     trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
     putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
-    listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com','Sylvi Listhaug')
+    # listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com','Sylvi Listhaug')
     gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com','Jonas Gahr Støre')
     
-    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+    # return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+
 
 @app.route('/api/changes')
 def changes():
@@ -359,7 +365,6 @@ def changes():
 
 @app.route('/')
 def home():
-
     return render_template("index.html")
 
 
