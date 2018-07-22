@@ -43,8 +43,6 @@ analyzer = SentimentIntensityAnalyzer()
 
 
 
-
-
 app = Flask(__name__)
 
 def movingavarage(values,window):
@@ -161,7 +159,9 @@ def foo():
                     c.execute('BEGIN TRANSACTION')
                     try:
                             c.executemany("INSERT INTO users (data1,sent,what) VALUES (?,?,?)", self.data)
+                            print("INSERTS")
                             conn.commit()
+                            conn.close()
 
                     except Exception as e:
                         print(str(e))
@@ -182,10 +182,12 @@ def foo():
                     tweet = unidecode(data['text'])
                 time_ms = data['timestamp_ms']
                 translations = translator.translate(str(tweet), dest='en')
-                tweet = translations.text
-                vs = analyzer.polarity_scores(tweet)
+                tweettrans = translations.text
+                vs = analyzer.polarity_scores(tweettrans)
                 sentiment = vs['compound']
                 time.sleep(1)
+                print(tweet)
+                print(sentiment)
                 with self.lock:
                     self.data.append((time_ms, tweet, sentiment))
             except KeyError as e:
@@ -199,7 +201,7 @@ def foo():
             auth = OAuthHandler(os.environ.get('ckey'), os.environ.get('csecret'))
             auth.set_access_token(os.environ.get('atoken'), os.environ.get('asecret'))
             twitterStream = Stream(auth, listener(lock))
-            twitterStream.filter(track=["Trump","Putin","Sylvi Listhaug","Jonas Gahr"])
+            twitterStream.filter(track=["Sylvi Listhaug","SylviListhaug","Listhaug","Jonas Gahr Støre","Jonas Støre","Jonas Gahr","Arbeiderpartiet", "Fremskrittspartiet", "Frp"])
 
 
         except Exception as e:
@@ -209,19 +211,26 @@ def foo():
 
 
 
-
+def cleanup(df):
+    newlist = []
+    for i in df:
+        if i not in newlist:
+            newlist.append(i)
+    return newlist
 
 
 def floatify(lst):
     floated_list = [float(i) for i in lst]
+    # floated_list = cleanup(floated_list)
     return floated_list
 
-@app.route("/trump")
+
+@app.route("/Arbeiderpartiet")
 def chart():
     try:
-        name = 'Trump'
+        name = 'Arbeiderpartiet'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Arbeiderpartiet%' OR '%AP%'",conn)
         Y = floatify(df['what'].values)[-100:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -232,9 +241,9 @@ def chart():
 @app.route("/putin")
 def chart2():
     try:
-        name = 'Putin'
+        name = 'Fremskrittspartiet'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Fremskrittspartiet%' OR '%frp%' ",conn)
         Y = floatify(df['what'].values)[-100:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -247,7 +256,7 @@ def chart3():
     try:
         name = 'Jonas Gahr Støre'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr Store%' OR '%Gahr%', '%Jonas Gahr%'" ,conn)
         Y = floatify(df['what'].values)[-100:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -261,7 +270,7 @@ def chart4():
     try:
         name = 'Sylvi Listhaug'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%' OR '%Listhaug%' OR '%SylviListhaug%' ",conn)
         Y = floatify(df['what'].values)[-100:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -326,10 +335,10 @@ def create_person_viewmodel(averagePoints, volume,link,name):
 
 def create_changes_response():
     conn = sql.connect("twitter.db")
-    trumpDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Trump%'", conn)
-    putinDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'", conn)
-    listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%'", conn)
-    gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr%'", conn)
+    ArbeiderpartietDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Arbeiderpartiet%' OR '%AP%' ", conn)
+    FremskrittspartietDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Fremskrittspartiet%' OR '%Frp%'", conn)
+    listhaugDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Sylvi Listhaug%' OR '%Listhaug%' OR '%SylviListhaug%' ", conn)
+    gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Jonas Gahr Store%' OR '%Gahr Store%' ", conn)
 
 
     # sort_values(trumpDf)
@@ -358,11 +367,11 @@ def create_changes_response():
 
     # putinpoints = putinDf.sentiment_smoothed.values
 
-    putinVolume = len(floatify(putinDf['what'].values))
-    trumpVolume = len(floatify(trumpDf['what'].values))
+    FremskrittspartietVolume = len(floatify(FremskrittspartietDf['what'].values))
+    ArbeiderpartietVolume = len(floatify(ArbeiderpartietDf['what'].values))
 
-    trumpAveragePoints = float('%.4f'%np.mean(floatify(trumpDf['what'].values)))
-    putinAveragePoints = float('%.4f'%np.mean(floatify(putinDf['what'].values)))
+    ArbeiderpartietAveragePoints = float('%.4f'%np.mean(floatify(ArbeiderpartietDf['what'].values)))
+    FremskrittspartietAveragePoints = float('%.4f'%np.mean(floatify(FremskrittspartietDf['what'].values)))
 
     listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
     listhaugVolume = len(floatify(listhaugDf['what'].values))
@@ -370,12 +379,12 @@ def create_changes_response():
     gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)))
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
-    trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
-    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
+    ArbeiderpartietViewModel = create_person_viewmodel(ArbeiderpartietAveragePoints, ArbeiderpartietVolume,'https://norsent.herokuapp.com/Arbeiderpartiet','Arbeiderpartiet')
+    FremskrittspartietViewModel = create_person_viewmodel(FremskrittspartietAveragePoints, FremskrittspartietVolume,'https://norsent.herokuapp.com/Fremskrittspartiet','Fremskrittspartiet')
     listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com/listhaug','Sylvi Listhaug')
     gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com/store','Jonas Gahr Støre')
     
-    return [trumpViewModel.toJSON(), putinViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
+    return [ArbeiderpartietViewModel.toJSON(), FremskrittspartietViewModel.toJSON(), listhaugViewModel.toJSON(), gahrstoreViewModel.toJSON()]
 
 
 
@@ -386,6 +395,7 @@ def changes():
 
 @app.route('/')
 def home():
+
     return render_template("index.html")
 
 
