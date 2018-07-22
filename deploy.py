@@ -232,7 +232,7 @@ def chart():
 @app.route("/putin")
 def chart2():
     try:
-        name = 'putin'
+        name = 'Putin'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE sent LIKE '%Putin%'",conn)
         Y = floatify(df['what'].values)[-100:]
@@ -371,7 +371,7 @@ def create_changes_response():
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
     trumpViewModel = create_person_viewmodel(trumpAveragePoints, trumpVolume,'https://norsent.herokuapp.com/trump','Trump')
-    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/trump','Putin')
+    putinViewModel = create_person_viewmodel(putinAveragePoints, putinVolume,'https://norsent.herokuapp.com/putin','Putin')
     listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com/listhaug','Sylvi Listhaug')
     gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com/store','Jonas Gahr Støre')
     
