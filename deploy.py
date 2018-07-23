@@ -251,7 +251,7 @@ def chart():
         name = 'Arbeiderpartiet'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE '%AP%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -266,7 +266,7 @@ def chart2():
         name = 'Fremskrittspartiet'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Fremskrittspartiet%' OR sent LIKE '%frp%')",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -279,7 +279,7 @@ def chart3():
         name = 'Jonas Gahr Støre'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Jonas Gahr Store%' OR sent LIKE '%Gahr%') " ,conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -293,7 +293,7 @@ def chart4():
         name = 'Rødt'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Rodt%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -307,7 +307,7 @@ def chart5():
         name = 'Kristelig Folkeparti'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE '%KRF%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -320,7 +320,7 @@ def chart6():
         name = 'Miljøpartiet De Grønne'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE '%MDG%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -333,7 +333,7 @@ def chart7():
         name = 'Senterpartiet'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE '%SP%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -347,7 +347,7 @@ def chart8():
         name = 'Sosialistisk Venstreparti'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE '%SV%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -361,7 +361,7 @@ def chart9():
         name = 'Venstre'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Venstre%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -375,7 +375,7 @@ def chart10():
         name = 'Erna Solberg'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Erna Solberg%' OR sent LIKE '%Erna_Solberg%' OR sent LIKE '%ErnaSolberg%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -389,7 +389,7 @@ def chart11():
         name = 'Knut Arild Hareide'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Knut Arild Hareide%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -403,7 +403,7 @@ def chart12():
         name = 'Bjørnar Moxnes'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Bjornar Moxnes%' OR sent LIKE '%BjornarMoxnesg%' OR sent LIKE '%Bjornar_Moxnes%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -418,7 +418,7 @@ def chart14():
         name = 'Audun Lysbakken'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Audun Lysbakken%' OR sent LIKE '%Audun_Lysbakken%' OR sent LIKE '%AudunLysbakken%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -431,7 +431,7 @@ def chart15():
         name = 'Trine Skei Grande'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Trine Skei Grande%' OR sent LIKE '%TrineSkeiGrande%' OR sent LIKE '%Trine_Skei_Grande%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -444,7 +444,7 @@ def chart16():
         name = 'Sylvi Listhaug'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sylvi Listhaug%' OR sent LIKE '%Listhaug%' OR sent LIKE '%SylviListhaug%' ) ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -457,7 +457,7 @@ def chart17():
         name = 'Høyre'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Hoyre%') ",conn)
-        Y = floatify(df['what'].values)[-300:]
+        Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
