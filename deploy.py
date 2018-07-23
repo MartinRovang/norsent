@@ -32,7 +32,6 @@ import base64
 from time import gmtime, strftime
 
 
-
 sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 os.chdir(os.path.realpath(os.path.dirname(__file__)))
 engine = create_engine('sqlite:///twitter.db', echo=True)
@@ -93,6 +92,10 @@ class PersonViewModel:
         }
 
 
+
+
+
+
 def new_person(search):
     conn = sql.connect('twitter.db')
     c = conn.cursor()
@@ -112,11 +115,6 @@ def new_person(search):
     except Exception as e:
         print("FAILED %s"%e)
         pass
-
-
-# conn = sql.connect('twitter.db')
-# c = conn.cursor()
-# c.execute("DELETE FROM users WHERE sent LIKE '%Ytre-Hoyre%'")
 
 
 
@@ -253,7 +251,7 @@ def chart():
         name = 'Arbeiderpartiet'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE '%AP%') ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -268,7 +266,7 @@ def chart2():
         name = 'Fremskrittspartiet'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Fremskrittspartiet%' OR sent LIKE '%frp%')",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -281,7 +279,7 @@ def chart3():
         name = 'Jonas Gahr Støre'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Jonas Gahr Store%' OR sent LIKE '%Gahr%') " ,conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -295,7 +293,7 @@ def chart4():
         name = 'Rødt'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Rodt%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -308,8 +306,8 @@ def chart5():
     try:
         name = 'Kristelig Folkeparti'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%') ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE '%KRF%') ",conn)
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -321,8 +319,8 @@ def chart6():
     try:
         name = 'Miljøpartiet De Grønne'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE '%MDG%') ",conn)
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -334,8 +332,8 @@ def chart7():
     try:
         name = 'Senterpartiet'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%') ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE '%SP%') ",conn)
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -348,8 +346,8 @@ def chart8():
     try:
         name = 'Sosialistisk Venstreparti'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE '%SV%') ",conn)
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -357,13 +355,13 @@ def chart8():
         return e
 
 
-@app.route("/V")
+@app.route("/venstre")
 def chart9():
     try:
         name = 'Venstre'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Venstre%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -377,7 +375,7 @@ def chart10():
         name = 'Erna Solberg'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Erna Solberg%' OR sent LIKE '%Erna_Solberg%' OR sent LIKE '%ErnaSolberg%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -391,7 +389,7 @@ def chart11():
         name = 'Knut Arild Hareide'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Knut Arild Hareide%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -405,7 +403,7 @@ def chart12():
         name = 'Bjørnar Moxnes'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Bjornar Moxnes%' OR sent LIKE '%BjornarMoxnesg%' OR sent LIKE '%Bjornar_Moxnes%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -420,7 +418,7 @@ def chart14():
         name = 'Audun Lysbakken'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Audun Lysbakken%' OR sent LIKE '%Audun_Lysbakken%' OR sent LIKE '%AudunLysbakken%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -433,7 +431,7 @@ def chart15():
         name = 'Trine Skei Grande'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Trine Skei Grande%' OR sent LIKE '%TrineSkeiGrande%' OR sent LIKE '%Trine_Skei_Grande%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -441,12 +439,25 @@ def chart15():
         return e
 
 @app.route("/listhaug")
-def chart18():
+def chart16():
     try:
         name = 'Sylvi Listhaug'
         conn = sql.connect("twitter.db")
         df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sylvi Listhaug%' OR sent LIKE '%Listhaug%' OR sent LIKE '%SylviListhaug%' ) ",conn)
-        Y = floatify(df['what'].values)[-100:]
+        Y = floatify(df['what'].values)[-300:]
+        labels = np.linspace(len(Y),0,len(Y))
+        return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
+    except Exception as e:
+        print("Trump"+str(e)+"")
+        return e
+
+@app.route("/hoyre")
+def chart17():
+    try:
+        name = 'Høyre'
+        conn = sql.connect("twitter.db")
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Hoyre%') ",conn)
+        Y = floatify(df['what'].values)[-300:]
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
@@ -465,7 +476,6 @@ def create_person_viewmodel(averagePoints, volume,link,name):
 
 def create_changes_response():
     conn = sql.connect("twitter.db")
-    c = conn.cursor()
     ArbeiderpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE '%AP%') ", conn)
     FremskrittspartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Fremskrittspartiet%' OR sent LIKE '%frp%')", conn)
     listhaugDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sylvi Listhaug%' OR sent LIKE '%Listhaug%' OR sent LIKE '%SylviListhaug%' ) ", conn)
@@ -476,71 +486,64 @@ def create_changes_response():
     rodtDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Rodt%') ", conn)
     KRFDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%KRF%' OR sent LIKE '%Kristelig Folkeparti%') ", conn)
     knuthareideDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Knut Arild Hareide%') ", conn)
-    miljopartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%') ", conn)
+    miljopartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE '%MDG%') ", conn)
     bjornarmoxDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Bjornar Moxnes%' OR sent LIKE '%BjornarMoxnes%') ", conn)
-    senterpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%') ", conn)
+    senterpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE '%SP%') ", conn)
     sosialistiskDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE '%SV%') ", conn)
     audunlysDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Audun Lysbakken%' OR sent LIKE '%AudunLysbakken%') ", conn)
     venstreDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Venstre%') ", conn)
     trinegrandeDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Trine Skei Grande%' OR sent LIKE '%TrineSkeiGrande%') ", conn)
 
 
-    #Clean wrong tweets
-    c.execute("DELETE FROM users WHERE sent LIKE '%Ytre-hoyre%'")
 
 
-
-
-
-
-
-    FremskrittspartietVolume = len(floatify(FremskrittspartietDf['what'].values))
+    FremskrittspartietVolume = len(floatify(FremskrittspartietDf['what'].values)[-100:])
     ArbeiderpartietVolume = len(floatify(ArbeiderpartietDf['what'].values))
 
-    hoyreDfAveragePoints = float('%.4f'%np.mean(floatify(hoyreDf['what'].values)))
+    hoyreDfAveragePoints = float('%.4f'%np.mean(floatify(hoyreDf['what'].values)[-100:]))
     hoyreDfVolume = len(floatify(hoyreDf['what'].values))
 
-    ernasolbergDfAveragePoints = float('%.4f'%np.mean(floatify(ernasolbergDf['what'].values)))
+    ernasolbergDfAveragePoints = float('%.4f'%np.mean(floatify(ernasolbergDf['what'].values)[-100:]))
     ernasolbergDfVolume = len(floatify(ernasolbergDf['what'].values))
 
-    rodtDfAveragePoints = float('%.4f'%np.mean(floatify(rodtDf['what'].values)))
+    rodtDfAveragePoints = float('%.4f'%np.mean(floatify(rodtDf['what'].values)[-100:]))
     rodtDfVolume = len(floatify(rodtDf['what'].values))
 
-    KRFDfAveragePoints = float('%.4f'%np.mean(floatify(KRFDf['what'].values)))
+    KRFDfAveragePoints = float('%.4f'%np.mean(floatify(KRFDf['what'].values)[-100:]))
     KRFDfVolume = len(floatify(KRFDf['what'].values))
 
-    knuthareideDfAveragePoints = float('%.4f'%np.mean(floatify(knuthareideDf['what'].values)))
+    knuthareideDfAveragePoints = float('%.4f'%np.mean(floatify(knuthareideDf['what'].values)[-100:]))
     knuthareideDfVolume = len(floatify(knuthareideDf['what'].values))
 
-    miljopartietDfAveragePoints = float('%.4f'%np.mean(floatify(miljopartietDf['what'].values)))
+    miljopartietDfAveragePoints = float('%.4f'%np.mean(floatify(miljopartietDf['what'].values)[-100:]))
     miljopartietDfVolume = len(floatify(miljopartietDf['what'].values))
 
-    bjornarmoxDfAveragePoints = float('%.4f'%np.mean(floatify(bjornarmoxDf['what'].values)))
+    bjornarmoxDfAveragePoints = float('%.4f'%np.mean(floatify(bjornarmoxDf['what'].values)[-100:]))
     bjornarmoxDfVolume = len(floatify(bjornarmoxDf['what'].values))
 
-    senterpartietDfAveragePoints = float('%.4f'%np.mean(floatify(senterpartietDf['what'].values)))
+    senterpartietDfAveragePoints = float('%.4f'%np.mean(floatify(senterpartietDf['what'].values)[-100:]))
     senterpartietDfVolume = len(floatify(senterpartietDf['what'].values))
 
 
-    sosialistiskDfAveragePoints = float('%.4f'%np.mean(floatify(sosialistiskDf['what'].values)))
+    sosialistiskDfAveragePoints = float('%.4f'%np.mean(floatify(sosialistiskDf['what'].values)[-100:]))
     sosialistiskDfVolume = len(floatify(sosialistiskDf['what'].values))
 
-    audunlysDfAveragePoints = float('%.4f'%np.mean(floatify(audunlysDf['what'].values)))
+    audunlysDfAveragePoints = float('%.4f'%np.mean(floatify(audunlysDf['what'].values)[-100:]))
     audunlysDfVolume = len(floatify(audunlysDf['what'].values))
 
-    venstreDfAveragePoints = float('%.4f'%np.mean(floatify(venstreDf['what'].values)))
+    venstreDfAveragePoints = float('%.4f'%np.mean(floatify(venstreDf['what'].values)[-100:]))
     venstreDfVolume = len(floatify(venstreDf['what'].values))
 
-    trinegrandeDfAveragePoints = float('%.4f'%np.mean(floatify(trinegrandeDf['what'].values)))
+    trinegrandeDfAveragePoints = float('%.4f'%np.mean(floatify(trinegrandeDf['what'].values)[-100:]))
     trinegrandeDfVolume = len(floatify(trinegrandeDf['what'].values))
 
-    ArbeiderpartietAveragePoints = float('%.4f'%np.mean(floatify(ArbeiderpartietDf['what'].values)))
-    FremskrittspartietAveragePoints = float('%.4f'%np.mean(floatify(FremskrittspartietDf['what'].values)))
+    ArbeiderpartietAveragePoints = float('%.4f'%np.mean(floatify(ArbeiderpartietDf['what'].values)[-100:]))
+    FremskrittspartietAveragePoints = float('%.4f'%np.mean(floatify(FremskrittspartietDf['what'].values)[-100:]))
 
-    listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)))
+    listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)[-100:]))
     listhaugVolume = len(floatify(listhaugDf['what'].values))
 
-    gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)))
+    gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)[-100:]))
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
 
@@ -558,11 +561,11 @@ def create_changes_response():
 
     miljopartietDfViewModel = create_person_viewmodel(miljopartietDfAveragePoints, miljopartietDfVolume,'https://norsent.herokuapp.com/mdg','Miljøpartiet De Grønne')
 
-    senterpartietDfViewModel = create_person_viewmodel(senterpartietDfAveragePoints, senterpartietDfVolume,'https://norsent.herokuapp.com/SP','Senterpartiet')
+    senterpartietDfViewModel = create_person_viewmodel(senterpartietDfAveragePoints, senterpartietDfVolume,'https://norsent.herokuapp.com/sp','Senterpartiet')
 
-    sosialistiskDfViewModel = create_person_viewmodel(sosialistiskDfAveragePoints, sosialistiskDfVolume,'https://norsent.herokuapp.com/SV','Sosialistisk Venstreparti')
+    sosialistiskDfViewModel = create_person_viewmodel(sosialistiskDfAveragePoints, sosialistiskDfVolume,'https://norsent.herokuapp.com/sv','Sosialistisk Venstreparti')
 
-    venstreDfViewModel = create_person_viewmodel(venstreDfAveragePoints, venstreDfVolume,'https://norsent.herokuapp.com/V','Venstre')
+    venstreDfViewModel = create_person_viewmodel(venstreDfAveragePoints, venstreDfVolume,'https://norsent.herokuapp.com/venstre','Venstre')
 
     #PARTILEDERE
 
@@ -578,11 +581,11 @@ def create_changes_response():
 
     audunlysDfViewModel = create_person_viewmodel(audunlysDfAveragePoints, audunlysDfVolume,'https://norsent.herokuapp.com/audun','Audun Lysbakken')
 
-    trinegrandeDfViewModel = create_person_viewmodel(trinegrandeDfAveragePoints, trinegrandeDfVolume,'https://norsent.herokuapp.com/TSG','Trine Skei Grande')
+    trinegrandeDfViewModel = create_person_viewmodel(trinegrandeDfAveragePoints, trinegrandeDfVolume,'https://norsent.herokuapp.com/tsg','Trine Skei Grande')
 
 
 
-    return [ArbeiderpartietViewModel.toJSON(), FremskrittspartietViewModel.toJSON(), hoyreDfViewModel.toJSON(), rodtDfViewModel.toJSON(), miljopartietDfViewModel.toJSON() \
+    return [ArbeiderpartietViewModel.toJSON(), FremskrittspartietViewModel.toJSON(), hoyreDfViewModel.toJSON(), rodtDfViewModel.toJSON(), KRFDfViewModel.toJSON(), miljopartietDfViewModel.toJSON() \
      ,senterpartietDfViewModel.toJSON(), sosialistiskDfViewModel.toJSON(), venstreDfViewModel.toJSON(), listhaugViewModel.toJSON() \
      ,gahrstoreViewModel.toJSON(), ernasolbergDfViewModel.toJSON(), knuthareideDfViewModel.toJSON() \
     , bjornarmoxDfViewModel.toJSON() \
@@ -599,6 +602,12 @@ def changes():
 def home():
 
     return render_template("index.html")
+
+
+@app.route('/info')
+def info():
+
+    return render_template("info.html")
 
 
 @app.route('/kontakt')

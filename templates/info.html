@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -111,67 +112,19 @@
           </div>
       </div>
     </div>
-    <!-- Bootstrap core JavaScript -->
-    <script src="{{url_for('static', filename ='vendor/jquery/jquery.min.js' )}}"></script>
-    <script src="{{url_for('static', filename ='vendor/bootstrap/js/bootstrap.bundle.min.js' )}}"></script>
-    <script>
-      
-      const maxWaitingTimePerInterval = 5000;
-      function getPersons() {
-        $.ajax({
-          url: "/api/changes",
-          type: "get",
-          success: function (response) {
-            const res = JSON.parse(JSON.stringify(response));
-            const personsContainer = document.getElementById('persons');
-
-            var personElements = res.persons.map(function (person, index) {
-              const container = document.createElement('div');
-              const linkTo = document.createElement('a');
-              const points = document.createElement('p');
-              const volume = document.createElement('p');
-              const img = document.createElement('img');
-              const br = document.createElement('br');
-
-              container.className = "container-person";
-
-              linkTo.href = person.link;
-              linkTo.innerText = person.name;
-
-              points.style = 'color:' + person.color;
-              let sign = "";
-              if (person.points > 0) {
-                sign = "+";
-              }
-              points.innerText = sign + person.points + " poeng";
-
-              img.src = person.arrow;
-              img.style = "width:25px;height:25px";
-              
-              volume.innerText =  "Volum: " + person.volume;
-
-              container.appendChild(linkTo);
-              container.appendChild(img);
-              container.appendChild(points);
-              container.appendChild(volume);
-
-              return container;
-            });
-            personsContainer.innerHTML = null;
-            personElements.map(function(x) {
-              personsContainer.innerHTML += x.outerHTML;
-            });
-          },
-          error: function (xhr) {
-            //Do Something to handle error
-          }
-        });
-      };
-      getPersons();
-      setInterval(getPersons, maxWaitingTimePerInterval);
 
 
-    </script>
-</body>
-
-</html>
+<b> Dette er et sommerprosjekt jeg har jobbet med sommeren 2018.</b>
+<br>
+<b>Jeg kommer til å oppdatere videre når jeg har tid.</b>
+<br>
+<br>
+<b>Hvordan fungerer det?: </b>
+<br>
+<b>Bruker machinelearning til å analysere setninger som blir tweetet av det gitte emnet. Videre vil hver setning bli
+  gitt en verdi fra -1 til 1.
+  <br> Her er -1 veldig negativt og 1 er veldig positivt. Herfra tas gjennomsnittet av tidligere verdier og gir en
+  positiv eller negativ trend.
+  <br> Hosting på heroku med gratis bruker sover hver 30 min hvis den står inaktiv og dermed resette databasen, dette
+  gjør at grafene kan være nesten tom for datapunkter.
+</b>
