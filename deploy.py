@@ -307,7 +307,7 @@ def chart5():
     try:
         name = 'Kristelig Folkeparti'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE 'KR%F') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE 'KRF') ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -487,7 +487,7 @@ def create_changes_response_party():
 
     rodtDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Rodt%') ", conn)
 
-    KRFDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE 'K%R%F' OR sent LIKE '%Kristelig Folkeparti%') ", conn)
+    KRFDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE 'KRF' OR sent LIKE '%Kristelig Folkeparti%') ", conn)
 
     miljopartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE 'M%DG' OR sent LIKE '%Miljopartiet%') ", conn)
 
