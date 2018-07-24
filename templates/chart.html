@@ -42,7 +42,10 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"></a>
+              <a class="nav-link" href="https://norsent.herokuapp.com/">Partier</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://norsent.herokuapp.com/ledere">Partiledere</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="https://norsent.herokuapp.com/info">Info</a>
@@ -85,8 +88,15 @@
         title: {
           display: true,
           text: 'Følelse rundt {{name}} ved å analysere twittermeldinger. Her vises trenden for de siste 500 meldingene.'
-        }
-      }
+        },
+        animation: {
+            duration: 0, // general animation time
+        },
+        hover: {
+            animationDuration: 0, // duration of animations when hovering an item
+        },
+        responsiveAnimationDuration: 0, // animation duration after a resize
+    }
     });
     </script> 
     

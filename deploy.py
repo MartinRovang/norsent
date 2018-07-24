@@ -72,13 +72,14 @@ def df_resample_sizes(df, maxlen=MAX_DF_LENGTH):
 
  # trump sine point, arrow, volume, color
 class PersonViewModel:
-    def __init__(self,points,arrow,volume,color,link,name):
+    def __init__(self,points,arrow,volume,color,link,name,icon):
         self.points = points
         self.arrow = arrow
         self.volume = volume
         self.color = color
         self.link = link
         self.name = name
+        self.icon = icon
     def toJSON(self):
         # return json.dumps(self, default=lambda o: o.__dict__, 
         #     sort_keys=True, indent=4)
@@ -88,9 +89,9 @@ class PersonViewModel:
             "volume": self.volume,
             "color": self.color,
             "link": self.link,
-            "name": self.name
+            "name": self.name,
+            "icon": self.icon
         }
-
 
 
 
@@ -221,7 +222,7 @@ def foo():
             twitterStream = Stream(auth, listener(lock))
             twitterStream.filter(track=["Sylvi Listhaug","SylviListhaug","Listhaug","Jonas Gahr Støre","Jonas Støre","Jonas Gahr","Arbeiderpartiet", "Fremskrittspartiet" \
             , "Høyre","Erna Solberg", "ErnaSolberg," "Rødt", "KRF","Kristelig Folkeparti", "Knut Arild Hareide", "Miljøpartiet De Grønne", "Bjørnar Moxnes"\
-            , "Senterpartiet", "Sosialistisk Venstreparti", "Audun Lysbakken","AudunLysbakken", "Venstre", "Trine Skei Grande","TrineSkeiGrande"])
+            , "Senterpartiet", "Sosialistisk Venstreparti", "Audun Lysbakken","AudunLysbakken", "Venstre", "Trine Skei Grande","TrineSkeiGrande","SV","AP","SP"])
 
 
         except Exception as e:
@@ -250,7 +251,7 @@ def chart():
     try:
         name = 'Arbeiderpartiet'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE '%AP%') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE 'A%P' ) ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -306,7 +307,7 @@ def chart5():
     try:
         name = 'Kristelig Folkeparti'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE '%KRF%') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Kristelig Folkeparti%' OR sent LIKE 'KR%F') ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -319,7 +320,7 @@ def chart6():
     try:
         name = 'Miljøpartiet De Grønne'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE '%MDG%') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE 'MD%G') ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -332,7 +333,7 @@ def chart7():
     try:
         name = 'Senterpartiet'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE '%SP%') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE 'S%P') ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
@@ -346,13 +347,14 @@ def chart8():
     try:
         name = 'Sosialistisk Venstreparti'
         conn = sql.connect("twitter.db")
-        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE '%SV%') ",conn)
+        df = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE 'S%V') ",conn)
         Y = movingavarage(floatify(df['what'].values)[-500:],25)
         labels = np.linspace(len(Y),0,len(Y))
         return render_template('chart.html' ,sent = Y ,labels = labels, name = name)
     except Exception as e:
         print("Trump"+str(e)+"")
         return e
+
 
 
 @app.route("/venstre")
@@ -466,36 +468,34 @@ def chart17():
 
 
 
-def create_person_viewmodel(averagePoints, volume,link,name):
+def create_person_viewmodel(averagePoints, volume,link,name,icon):
     arrow = 'https://i.imgur.com/LpNWTl2.png'
     color = 'red'
     if averagePoints > 0:
         arrow = 'https://i.imgur.com/6OVin7T.png'
         color = 'green'
-    return PersonViewModel(averagePoints, arrow, volume, color, link, name)
+    return PersonViewModel(averagePoints, arrow, volume, color, link, name, icon)
 
-def create_changes_response():
+def create_changes_response_party():
     conn = sql.connect("twitter.db")
-    ArbeiderpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE '%AP%') ", conn)
+
+    ArbeiderpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Arbeiderpartiet%' OR sent LIKE 'A%P') ", conn)
+
     FremskrittspartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Fremskrittspartiet%' OR sent LIKE '%frp%')", conn)
-    listhaugDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sylvi Listhaug%' OR sent LIKE '%Listhaug%' OR sent LIKE '%SylviListhaug%' ) ", conn)
-    gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Jonas Gahr Store%' OR sent LIKE '%Gahr%') ", conn)
 
     hoyreDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Hoyre%') ", conn)
-    ernasolbergDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Erna Solberg%' OR sent LIKE '%ErnaSolberg%'OR sent LIKE '%Erna_Solberg%') ", conn)
+
     rodtDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Rodt%') ", conn)
-    KRFDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%KRF%' OR sent LIKE '%Kristelig Folkeparti%') ", conn)
-    knuthareideDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Knut Arild Hareide%') ", conn)
-    miljopartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE '%MDG%') ", conn)
-    bjornarmoxDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Bjornar Moxnes%' OR sent LIKE '%BjornarMoxnes%') ", conn)
-    senterpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE '%SP%') ", conn)
-    sosialistiskDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE '%SV%') ", conn)
-    audunlysDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Audun Lysbakken%' OR sent LIKE '%AudunLysbakken%') ", conn)
+
+    KRFDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE 'K%R%F' OR sent LIKE '%Kristelig Folkeparti%') ", conn)
+
+    miljopartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Miljopartiet De Gronne%' OR sent LIKE 'M%DG' OR sent LIKE '%Miljopartiet%') ", conn)
+
+    senterpartietDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Senterpartiet%' OR sent LIKE 'S%P') ", conn)
+
+    sosialistiskDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sosialistisk Venstreparti%' OR sent LIKE 'S%V') ", conn)
+
     venstreDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Venstre%') ", conn)
-    trinegrandeDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Trine Skei Grande%' OR sent LIKE '%TrineSkeiGrande%') ", conn)
-
-
-
 
     FremskrittspartietVolume = len(floatify(FremskrittspartietDf['what'].values)[-100:])
     ArbeiderpartietVolume = len(floatify(ArbeiderpartietDf['what'].values))
@@ -503,8 +503,6 @@ def create_changes_response():
     hoyreDfAveragePoints = float('%.4f'%np.mean(floatify(hoyreDf['what'].values)[-100:]))
     hoyreDfVolume = len(floatify(hoyreDf['what'].values))
 
-    ernasolbergDfAveragePoints = float('%.4f'%np.mean(floatify(ernasolbergDf['what'].values)[-100:]))
-    ernasolbergDfVolume = len(floatify(ernasolbergDf['what'].values))
 
     rodtDfAveragePoints = float('%.4f'%np.mean(floatify(rodtDf['what'].values)[-100:]))
     rodtDfVolume = len(floatify(rodtDf['what'].values))
@@ -512,33 +510,86 @@ def create_changes_response():
     KRFDfAveragePoints = float('%.4f'%np.mean(floatify(KRFDf['what'].values)[-100:]))
     KRFDfVolume = len(floatify(KRFDf['what'].values))
 
-    knuthareideDfAveragePoints = float('%.4f'%np.mean(floatify(knuthareideDf['what'].values)[-100:]))
-    knuthareideDfVolume = len(floatify(knuthareideDf['what'].values))
-
+ 
     miljopartietDfAveragePoints = float('%.4f'%np.mean(floatify(miljopartietDf['what'].values)[-100:]))
     miljopartietDfVolume = len(floatify(miljopartietDf['what'].values))
-
-    bjornarmoxDfAveragePoints = float('%.4f'%np.mean(floatify(bjornarmoxDf['what'].values)[-100:]))
-    bjornarmoxDfVolume = len(floatify(bjornarmoxDf['what'].values))
 
     senterpartietDfAveragePoints = float('%.4f'%np.mean(floatify(senterpartietDf['what'].values)[-100:]))
     senterpartietDfVolume = len(floatify(senterpartietDf['what'].values))
 
-
     sosialistiskDfAveragePoints = float('%.4f'%np.mean(floatify(sosialistiskDf['what'].values)[-100:]))
     sosialistiskDfVolume = len(floatify(sosialistiskDf['what'].values))
-
-    audunlysDfAveragePoints = float('%.4f'%np.mean(floatify(audunlysDf['what'].values)[-100:]))
-    audunlysDfVolume = len(floatify(audunlysDf['what'].values))
 
     venstreDfAveragePoints = float('%.4f'%np.mean(floatify(venstreDf['what'].values)[-100:]))
     venstreDfVolume = len(floatify(venstreDf['what'].values))
 
-    trinegrandeDfAveragePoints = float('%.4f'%np.mean(floatify(trinegrandeDf['what'].values)[-100:]))
-    trinegrandeDfVolume = len(floatify(trinegrandeDf['what'].values))
 
     ArbeiderpartietAveragePoints = float('%.4f'%np.mean(floatify(ArbeiderpartietDf['what'].values)[-100:]))
     FremskrittspartietAveragePoints = float('%.4f'%np.mean(floatify(FremskrittspartietDf['what'].values)[-100:]))
+
+
+
+    #PARTIER
+
+    ArbeiderpartietViewModel = create_person_viewmodel(ArbeiderpartietAveragePoints, ArbeiderpartietVolume,'https://norsent.herokuapp.com/Arbeiderpartiet','Arbeiderpartiet','https://i.imgur.com/Py3QHPy.png')
+
+    FremskrittspartietViewModel = create_person_viewmodel(FremskrittspartietAveragePoints, FremskrittspartietVolume,'https://norsent.herokuapp.com/Fremskrittspartiet','Fremskrittspartiet','https://i.imgur.com/boNXCox.jpg')
+
+    hoyreDfViewModel = create_person_viewmodel(hoyreDfAveragePoints, hoyreDfVolume,'https://norsent.herokuapp.com/hoyre','Høyre','https://i.imgur.com/Mf6mzbT.png')
+
+    rodtDfViewModel = create_person_viewmodel(rodtDfAveragePoints, rodtDfVolume,'https://norsent.herokuapp.com/rodt','Rødt','https://i.imgur.com/MJ78NyY.png')
+
+    KRFDfViewModel = create_person_viewmodel(KRFDfAveragePoints, KRFDfVolume,'https://norsent.herokuapp.com/krf','Kristelig Folkeparti','https://i.imgur.com/rPRFHHV.png')
+
+    miljopartietDfViewModel = create_person_viewmodel(miljopartietDfAveragePoints, miljopartietDfVolume,'https://norsent.herokuapp.com/mdg','Miljøpartiet De Grønne','https://i.imgur.com/FOm7Pt7.png')
+
+    senterpartietDfViewModel = create_person_viewmodel(senterpartietDfAveragePoints, senterpartietDfVolume,'https://norsent.herokuapp.com/sp','Senterpartiet','https://i.imgur.com/N81XVVC.png')
+
+    sosialistiskDfViewModel = create_person_viewmodel(sosialistiskDfAveragePoints, sosialistiskDfVolume,'https://norsent.herokuapp.com/sv','Sosialistisk Venstreparti','https://i.imgur.com/ksmjqrO.png')
+
+    venstreDfViewModel = create_person_viewmodel(venstreDfAveragePoints, venstreDfVolume,'https://norsent.herokuapp.com/venstre','Venstre','https://i.imgur.com/GaFFNOd.png')
+
+
+
+    return [ArbeiderpartietViewModel.toJSON(), FremskrittspartietViewModel.toJSON(), hoyreDfViewModel.toJSON(), rodtDfViewModel.toJSON(), KRFDfViewModel.toJSON(), miljopartietDfViewModel.toJSON() \
+     ,senterpartietDfViewModel.toJSON(), venstreDfViewModel.toJSON(), sosialistiskDfViewModel.toJSON()]
+
+
+
+
+
+def create_changes_response():
+    conn = sql.connect("twitter.db")
+
+    listhaugDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Sylvi Listhaug%' OR sent LIKE '%Listhaug%' OR sent LIKE '%SylviListhaug%' ) ", conn)
+
+    gahrstoreDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Jonas Gahr Store%' OR sent LIKE '%Gahr%') ", conn)
+
+    ernasolbergDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Erna Solberg%' OR sent LIKE '%ErnaSolberg%'OR sent LIKE '%Erna_Solberg%') ", conn)
+
+    knuthareideDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Knut Arild Hareide%') ", conn)
+
+    bjornarmoxDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Bjornar Moxnes%' OR sent LIKE '%BjornarMoxnes%') ", conn)
+
+    audunlysDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Audun Lysbakken%' OR sent LIKE '%AudunLysbakken%') ", conn)
+
+    trinegrandeDf = pd.read_sql("SELECT * FROM users WHERE (sent LIKE '%Trine Skei Grande%' OR sent LIKE '%TrineSkeiGrande%') ", conn)
+
+
+    ernasolbergDfAveragePoints = float('%.4f'%np.mean(floatify(ernasolbergDf['what'].values)[-100:]))
+    ernasolbergDfVolume = len(floatify(ernasolbergDf['what'].values))
+
+    knuthareideDfAveragePoints = float('%.4f'%np.mean(floatify(knuthareideDf['what'].values)[-100:]))
+    knuthareideDfVolume = len(floatify(knuthareideDf['what'].values))
+
+    bjornarmoxDfAveragePoints = float('%.4f'%np.mean(floatify(bjornarmoxDf['what'].values)[-100:]))
+    bjornarmoxDfVolume = len(floatify(bjornarmoxDf['what'].values))
+
+    audunlysDfAveragePoints = float('%.4f'%np.mean(floatify(audunlysDf['what'].values)[-100:]))
+    audunlysDfVolume = len(floatify(audunlysDf['what'].values))
+
+    trinegrandeDfAveragePoints = float('%.4f'%np.mean(floatify(trinegrandeDf['what'].values)[-100:]))
+    trinegrandeDfVolume = len(floatify(trinegrandeDf['what'].values))
 
     listhaugAveragePoints = float('%.4f'%np.mean(floatify(listhaugDf['what'].values)[-100:]))
     listhaugVolume = len(floatify(listhaugDf['what'].values))
@@ -546,62 +597,54 @@ def create_changes_response():
     gahrstoreAveragePoints = float('%.4f'%np.mean(floatify(gahrstoreDf['what'].values)[-100:]))
     gahrstoreVolume = len(floatify(gahrstoreDf['what'].values))
 
-
-    #PARTIER
-
-    ArbeiderpartietViewModel = create_person_viewmodel(ArbeiderpartietAveragePoints, ArbeiderpartietVolume,'https://norsent.herokuapp.com/Arbeiderpartiet','Arbeiderpartiet')
-
-    FremskrittspartietViewModel = create_person_viewmodel(FremskrittspartietAveragePoints, FremskrittspartietVolume,'https://norsent.herokuapp.com/Fremskrittspartiet','Fremskrittspartiet')
-
-    hoyreDfViewModel = create_person_viewmodel(hoyreDfAveragePoints, hoyreDfVolume,'https://norsent.herokuapp.com/hoyre','Høyre')
-
-    rodtDfViewModel = create_person_viewmodel(rodtDfAveragePoints, rodtDfVolume,'https://norsent.herokuapp.com/rodt','Rødt')
-
-    KRFDfViewModel = create_person_viewmodel(KRFDfAveragePoints, KRFDfVolume,'https://norsent.herokuapp.com/krf','Kristelig Folkeparti')
-
-    miljopartietDfViewModel = create_person_viewmodel(miljopartietDfAveragePoints, miljopartietDfVolume,'https://norsent.herokuapp.com/mdg','Miljøpartiet De Grønne')
-
-    senterpartietDfViewModel = create_person_viewmodel(senterpartietDfAveragePoints, senterpartietDfVolume,'https://norsent.herokuapp.com/sp','Senterpartiet')
-
-    sosialistiskDfViewModel = create_person_viewmodel(sosialistiskDfAveragePoints, sosialistiskDfVolume,'https://norsent.herokuapp.com/sv','Sosialistisk Venstreparti')
-
-    venstreDfViewModel = create_person_viewmodel(venstreDfAveragePoints, venstreDfVolume,'https://norsent.herokuapp.com/venstre','Venstre')
-
     #PARTILEDERE
 
-    listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com/listhaug','Sylvi Listhaug')
+    listhaugViewModel = create_person_viewmodel(listhaugAveragePoints, listhaugVolume,'https://norsent.herokuapp.com/listhaug','Sylvi Listhaug','https://upload.wikimedia.org/wikipedia/commons/c/cd/Sylvi_Listhaug_-_2014-02-13_at_18-49-18.jpg')
 
-    gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com/store','Jonas Gahr Støre')
+    gahrstoreViewModel = create_person_viewmodel(gahrstoreAveragePoints, gahrstoreVolume,'https://norsent.herokuapp.com/store','Jonas Gahr Støre','https://www.stortinget.no/Personimages/PersonImages_Large/JGS_stort.jpg')
 
-    ernasolbergDfViewModel = create_person_viewmodel(ernasolbergDfAveragePoints, ernasolbergDfVolume,'https://norsent.herokuapp.com/erna','Erna Solberg')
+    ernasolbergDfViewModel = create_person_viewmodel(ernasolbergDfAveragePoints, ernasolbergDfVolume,'https://norsent.herokuapp.com/erna','Erna Solberg','https://media.snl.no/system/images/55190/standard_ernasolberg2_portrett.jpg')
 
-    knuthareideDfViewModel = create_person_viewmodel(knuthareideDfAveragePoints, knuthareideDfVolume,'https://norsent.herokuapp.com/knutarild','Knut Arild Hareide')
+    knuthareideDfViewModel = create_person_viewmodel(knuthareideDfAveragePoints, knuthareideDfVolume,'https://norsent.herokuapp.com/knutarild','Knut Arild Hareide','https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Knut_Arild_Hareide_%28KrF%29.JPG/800px-Knut_Arild_Hareide_%28KrF%29.JPG')
 
-    bjornarmoxDfViewModel = create_person_viewmodel(bjornarmoxDfAveragePoints, bjornarmoxDfVolume,'https://norsent.herokuapp.com/bjornarmox','Bjørnar Moxnes')
+    bjornarmoxDfViewModel = create_person_viewmodel(bjornarmoxDfAveragePoints, bjornarmoxDfVolume,'https://norsent.herokuapp.com/bjornarmox','Bjørnar Moxnes','https://upload.wikimedia.org/wikipedia/commons/e/ea/Bj%C3%B8rnar_Moxnes_2016.jpg')
 
-    audunlysDfViewModel = create_person_viewmodel(audunlysDfAveragePoints, audunlysDfVolume,'https://norsent.herokuapp.com/audun','Audun Lysbakken')
+    audunlysDfViewModel = create_person_viewmodel(audunlysDfAveragePoints, audunlysDfVolume,'https://norsent.herokuapp.com/audun','Audun Lysbakken','https://upload.wikimedia.org/wikipedia/commons/e/e4/Audun_Lysbakken_jamstalldhetsminister_Norge.jpg')
 
-    trinegrandeDfViewModel = create_person_viewmodel(trinegrandeDfAveragePoints, trinegrandeDfVolume,'https://norsent.herokuapp.com/tsg','Trine Skei Grande')
-
-
-
-    return [ArbeiderpartietViewModel.toJSON(), FremskrittspartietViewModel.toJSON(), hoyreDfViewModel.toJSON(), rodtDfViewModel.toJSON(), KRFDfViewModel.toJSON(), miljopartietDfViewModel.toJSON() \
-     ,senterpartietDfViewModel.toJSON(), sosialistiskDfViewModel.toJSON(), venstreDfViewModel.toJSON(), listhaugViewModel.toJSON() \
-     ,gahrstoreViewModel.toJSON(), ernasolbergDfViewModel.toJSON(), knuthareideDfViewModel.toJSON() \
-    , bjornarmoxDfViewModel.toJSON() \
-    , audunlysDfViewModel.toJSON(), trinegrandeDfViewModel.toJSON()]
+    trinegrandeDfViewModel = create_person_viewmodel(trinegrandeDfAveragePoints, trinegrandeDfVolume,'https://norsent.herokuapp.com/tsg','Trine Skei Grande','https://upload.wikimedia.org/wikipedia/commons/e/ed/Trine_Skei_Grande.jpg')
 
 
 
-@app.route('/api/changes')
+    return [listhaugViewModel.toJSON(),gahrstoreViewModel.toJSON(), ernasolbergDfViewModel.toJSON(), knuthareideDfViewModel.toJSON() \
+    , bjornarmoxDfViewModel.toJSON() , audunlysDfViewModel.toJSON(), trinegrandeDfViewModel.toJSON()]
+
+
+
+
+
+@app.route('/api/changes/party')
 def changes():
+    persons = {"persons": create_changes_response_party()}
+    return jsonify(persons)
+
+
+@app.route('/api/changes/leaders')
+def changes1():
     persons = {"persons": create_changes_response()}
     return jsonify(persons)
+
 
 @app.route('/')
 def home():
 
-    return render_template("index.html")
+    return render_template("parti.html")
+
+
+@app.route('/ledere')
+def home2():
+
+    return render_template("ledere.html")
+
 
 
 @app.route('/info')
