@@ -222,7 +222,7 @@ def foo():
             twitterStream = Stream(auth, listener(lock))
             twitterStream.filter(track=["Sylvi Listhaug","SylviListhaug","Listhaug","Jonas Gahr Støre","Jonas Støre","Jonas Gahr","Arbeiderpartiet", "Fremskrittspartiet" \
             , "Høyre","Erna Solberg", "ErnaSolberg," "Rødt", "KRF","Kristelig Folkeparti", "Knut Arild Hareide", "Miljøpartiet De Grønne", "Bjørnar Moxnes"\
-            , "Senterpartiet", "Sosialistisk Venstreparti", "Audun Lysbakken","AudunLysbakken", "Venstre", "Trine Skei Grande","TrineSkeiGrande","SV","AP","SP"])
+            , "Senterpartiet", "Sosialistisk Venstreparti", "Audun Lysbakken","AudunLysbakken", "Venstre", "Trine Skei Grande","TrineSkeiGrande"])
 
 
         except Exception as e:
