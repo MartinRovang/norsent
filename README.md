@@ -5,7 +5,6 @@ Hvis nettsiden har vært inaktiv vil det ta litt tid før den starter igjen når
 INFO:
 
 Dette er et sommerprosjekt jeg har jobbet med sommeren 2018. 
-Jeg kommer til å oppdatere videre når jeg har tid. 
 
 Hvordan fungerer det?: 
 Bruker machinelearning til å analysere setninger som blir tweetet av det gitte emnet. Videre vil hver setning bli gitt en verdi fra -1 til 1. 
