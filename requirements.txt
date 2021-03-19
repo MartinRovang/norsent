@@ -28,7 +28,7 @@ hyperlink==18.0.0
 incremental==17.5.0
 inflection==0.3.1
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 jsonschema==2.6.0
 kiwisolver==1.0.1
 lxml==4.2.2
